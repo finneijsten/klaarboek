@@ -10,7 +10,7 @@
 | Bank Sync | Nordigen (GoCardless) | PSD2-compliant, NL banks covered |
 | Auth | Auth.js | Simple, proven |
 | Hosting | Vercel (FE) + Railway (BE) | Fast to deploy, cheap to start |
-| BTW Filing | Belastingdienst e-Herkenning API | Required for real filing |
+| BTW Filing | SBR/Digipoort (SOAP) + e-Herkenning | Required for real filing |
 
 ## Architecture Overview
 
@@ -45,7 +45,10 @@
 ### 3. BTW Engine
 - Automatic quarterly BTW calculation
 - Pre-filled BTW-aangifte ready for submission
-- Integration with Belastingdienst via e-Herkenning
+- Integration with Belastingdienst via SBR/Digipoort (SOAP-based, not REST)
+- PKI certificate handling for e-Herkenning authentication
+- Async submission pipeline — Digipoort doesn't respond instantly
+- Separate service/adapter, not baked into core FastAPI
 
 ### 4. Invoice Module
 - Create and send professional invoices
