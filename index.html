@@ -9,8 +9,8 @@
 
         body {
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #F8FAFC;
-            color: #1E293B;
+            background: #1E293B;
+            color: #E2E8F0;
             overflow-x: hidden;
         }
 
@@ -23,7 +23,7 @@
             text-align: center;
             padding: 2rem;
             position: relative;
-            background: linear-gradient(180deg, #ECFDF5 0%, #F8FAFC 100%);
+            background: linear-gradient(180deg, #1A3342 0%, #1E293B 100%);
         }
 
         .hero-content { position: relative; z-index: 1; max-width: 800px; }
@@ -31,7 +31,7 @@
         .logo {
             font-size: 1.2rem;
             font-weight: 700;
-            color: #059669;
+            color: #34D399;
             letter-spacing: 3px;
             text-transform: uppercase;
             margin-bottom: 2rem;
@@ -42,14 +42,14 @@
             font-weight: 800;
             line-height: 1.1;
             margin-bottom: 1.5rem;
-            color: #0F172A;
+            color: #F1F5F9;
         }
 
-        h1 span { color: #059669; }
+        h1 span { color: #34D399; }
 
         .subtitle {
             font-size: clamp(1.1rem, 2.5vw, 1.4rem);
-            color: #64748B;
+            color: #94A3B8;
             line-height: 1.6;
             margin-bottom: 3rem;
             max-width: 600px;
@@ -68,17 +68,17 @@
         .cta-form input {
             padding: 1rem 1.5rem;
             font-size: 1rem;
-            border: 2px solid #D1D5DB;
+            border: 2px solid #374151;
             border-radius: 12px;
-            background: #fff;
+            background: #263348;
             color: #1E293B;
             width: 320px;
             outline: none;
             transition: border-color 0.3s;
         }
 
-        .cta-form input:focus { border-color: #059669; }
-        .cta-form input::placeholder { color: #9CA3AF; }
+        .cta-form input:focus { border-color: #34D399; }
+        .cta-form input::placeholder { color: #6B7280; }
 
         .cta-form button {
             padding: 1rem 2rem;
@@ -86,7 +86,7 @@
             font-weight: 700;
             border: none;
             border-radius: 12px;
-            background: #059669;
+            background: #10B981;
             color: #fff;
             cursor: pointer;
             transition: all 0.3s;
@@ -94,16 +94,16 @@
         }
 
         .cta-form button:hover {
-            background: #047857;
+            background: #059669;
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(5, 150, 105, 0.25);
         }
 
-        .cta-note { font-size: 0.85rem; color: #9CA3AF; }
+        .cta-note { font-size: 0.85rem; color: #6B7280; }
 
         .stats {
             padding: 4rem 2rem;
-            background: #fff;
+            background: #263348;
             border-top: 1px solid #E5E7EB;
             border-bottom: 1px solid #E5E7EB;
         }
@@ -117,8 +117,8 @@
             text-align: center;
         }
 
-        .stat-number { font-size: 3rem; font-weight: 800; color: #059669; }
-        .stat-label { color: #64748B; font-size: 1rem; margin-top: 0.5rem; }
+        .stat-number { font-size: 3rem; font-weight: 800; color: #34D399; }
+        .stat-label { color: #94A3B8; font-size: 1rem; margin-top: 0.5rem; }
 
         .features {
             padding: 6rem 2rem;
@@ -130,14 +130,14 @@
             text-align: center;
             font-size: 2.5rem;
             margin-bottom: 1rem;
-            color: #0F172A;
+            color: #F1F5F9;
         }
 
-        .features h2 span { color: #059669; }
+        .features h2 span { color: #34D399; }
 
         .features-subtitle {
             text-align: center;
-            color: #64748B;
+            color: #94A3B8;
             font-size: 1.15rem;
             margin-bottom: 4rem;
         }
@@ -149,23 +149,23 @@
         }
 
         .feature-card {
-            background: #fff;
+            background: #263348;
             border-radius: 16px;
             padding: 2rem;
             transition: all 0.3s;
-            border: 1px solid #E5E7EB;
+            border: 1px solid #374151;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
 
         .feature-card:hover {
-            border-color: #059669;
+            border-color: #34D399;
             transform: translateY(-4px);
             box-shadow: 0 12px 40px rgba(5, 150, 105, 0.1);
         }
 
         .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-        .feature-card h3 { font-size: 1.3rem; margin-bottom: 0.75rem; color: #0F172A; }
-        .feature-card p { color: #64748B; line-height: 1.6; }
+        .feature-card h3 { font-size: 1.3rem; margin-bottom: 0.75rem; color: #F1F5F9; }
+        .feature-card p { color: #94A3B8; line-height: 1.6; }
 
         .how-it-works {
             padding: 6rem 2rem;
@@ -177,29 +177,29 @@
             text-align: center;
             font-size: 2.5rem;
             margin-bottom: 4rem;
-            color: #0F172A;
+            color: #F1F5F9;
         }
 
-        .how-it-works h2 span { color: #059669; }
+        .how-it-works h2 span { color: #34D399; }
 
         .steps { display: flex; flex-direction: column; gap: 3rem; }
         .step { display: flex; align-items: flex-start; gap: 2rem; }
-        .step-number { font-size: 3rem; font-weight: 800; color: #059669; min-width: 60px; line-height: 1; }
-        .step h3 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #0F172A; }
-        .step p { color: #64748B; line-height: 1.6; }
+        .step-number { font-size: 3rem; font-weight: 800; color: #34D399; min-width: 60px; line-height: 1; }
+        .step h3 { font-size: 1.3rem; margin-bottom: 0.5rem; color: #F1F5F9; }
+        .step p { color: #94A3B8; line-height: 1.6; }
 
         .pricing {
             padding: 6rem 2rem;
             text-align: center;
-            background: #ECFDF5;
+            background: #1A2E3B;
         }
 
-        .pricing h2 { font-size: 2.5rem; margin-bottom: 1rem; color: #0F172A; }
-        .pricing h2 span { color: #059669; }
-        .pricing-subtitle { color: #64748B; font-size: 1.15rem; margin-bottom: 3rem; }
+        .pricing h2 { font-size: 2.5rem; margin-bottom: 1rem; color: #F1F5F9; }
+        .pricing h2 span { color: #34D399; }
+        .pricing-subtitle { color: #94A3B8; font-size: 1.15rem; margin-bottom: 3rem; }
 
         .pricing-card {
-            background: #fff;
+            background: #263348;
             border: 2px solid #059669;
             border-radius: 20px;
             padding: 3rem;
@@ -208,20 +208,20 @@
             box-shadow: 0 4px 20px rgba(5, 150, 105, 0.1);
         }
 
-        .price { font-size: 4rem; font-weight: 800; color: #059669; }
-        .price-period { font-size: 1.2rem; color: #64748B; margin-bottom: 2rem; }
+        .price { font-size: 4rem; font-weight: 800; color: #34D399; }
+        .price-period { font-size: 1.2rem; color: #94A3B8; margin-bottom: 2rem; }
 
         .pricing-features { list-style: none; text-align: left; margin-bottom: 2rem; }
         .pricing-features li {
             padding: 0.75rem 0;
             border-bottom: 1px solid #E5E7EB;
-            color: #475569;
+            color: #CBD5E1;
             font-size: 1.05rem;
         }
 
         .pricing-features li::before {
             content: '\2713';
-            color: #059669;
+            color: #34D399;
             font-weight: 700;
             margin-right: 0.75rem;
         }
@@ -233,7 +233,7 @@
             font-weight: 700;
             border: none;
             border-radius: 12px;
-            background: #059669;
+            background: #10B981;
             color: #fff;
             cursor: pointer;
             text-decoration: none;
@@ -241,7 +241,7 @@
         }
 
         .pricing-cta:hover {
-            background: #047857;
+            background: #059669;
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(5, 150, 105, 0.25);
         }
@@ -249,13 +249,13 @@
         .final-cta {
             padding: 6rem 2rem;
             text-align: center;
-            background: #F0FDF4;
+            background: #1A2E3B;
         }
 
-        .final-cta h2 { font-size: 2.5rem; margin-bottom: 1rem; color: #0F172A; }
-        .final-cta h2 span { color: #059669; }
+        .final-cta h2 { font-size: 2.5rem; margin-bottom: 1rem; color: #F1F5F9; }
+        .final-cta h2 span { color: #34D399; }
         .final-cta p {
-            color: #64748B;
+            color: #94A3B8;
             font-size: 1.15rem;
             margin-bottom: 3rem;
             max-width: 600px;
@@ -266,13 +266,13 @@
         footer {
             padding: 3rem 2rem;
             text-align: center;
-            color: #9CA3AF;
+            color: #6B7280;
             font-size: 0.9rem;
             border-top: 1px solid #E5E7EB;
-            background: #fff;
+            background: #263348;
         }
 
-        footer a { color: #059669; text-decoration: none; }
+        footer a { color: #34D399; text-decoration: none; }
 
         @media (max-width: 640px) {
             .cta-form { flex-direction: column; align-items: center; }
