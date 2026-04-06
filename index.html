@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KlaarBoek — De boekhouder die werkt terwijl jij slaapt</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0F172A;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 212, 126, 0.08) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .hero-content { position: relative; z-index: 1; max-width: 800px; }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #00D47E;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 span { color: #00D47E; }
+
+        .subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            color: #94A3B8;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Email Form */
+        .cta-form {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .cta-form input {
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            border: 2px solid #1E293B;
+            border-radius: 12px;
+            background: #1A243B;
+            color: #fff;
+            width: 320px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .cta-form input:focus { border-color: #00D47E; }
+
+        .cta-form input::placeholder { color: #64748B; }
+
+        .cta-form button {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            background: #00D47E;
+            color: #0F172A;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .cta-form button:hover {
+            background: #00F590;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 212, 126, 0.3);
+        }
+
+        .cta-note {
+            font-size: 0.85rem;
+            color: #64748B;
+        }
+
+        /* Features */
+        .features {
+            padding: 6rem 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .features h2 span { color: #00D47E; }
+
+        .features-subtitle {
+            text-align: center;
+            color: #94A3B8;
+            font-size: 1.15rem;
+            margin-bottom: 4rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: #1A243B;
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .feature-card:hover {
+            border-color: #00D47E;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 212, 126, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+            color: #fff;
+        }
+
+        .feature-card p {
+            color: #94A3B8;
+            line-height: 1.6;
+        }
+
+        /* Stats */
+        .stats {
+            padding: 4rem 2rem;
+            background: #1A243B;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #00D47E;
+        }
+
+        .stat-label {
+            color: #94A3B8;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* How it works */
+        .how-it-works {
+            padding: 6rem 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .how-it-works h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .how-it-works h2 span { color: #00D47E; }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+
+        .step-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #00D47E;
+            min-width: 60px;
+            line-height: 1;
+        }
+
+        .step h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .step p {
+            color: #94A3B8;
+            line-height: 1.6;
+        }
+
+        /* Pricing */
+        .pricing {
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .pricing h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pricing h2 span { color: #00D47E; }
+
+        .pricing-subtitle {
+            color: #94A3B8;
+            font-size: 1.15rem;
+            margin-bottom: 3rem;
+        }
+
+        .pricing-card {
+            background: #1A243B;
+            border: 2px solid #00D47E;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .price {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #00D47E;
+        }
+
+        .price-period {
+            font-size: 1.2rem;
+            color: #94A3B8;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-features li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #2A3450;
+            color: #CBD5E1;
+            font-size: 1.05rem;
+        }
+
+        .pricing-features li::before {
+            content: '\2713';
+            color: #00D47E;
+            font-weight: 700;
+            margin-right: 0.75rem;
+        }
+
+        .pricing-cta {
+            display: inline-block;
+            padding: 1rem 3rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            background: #00D47E;
+            color: #0F172A;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .pricing-cta:hover {
+            background: #00F590;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 212, 126, 0.3);
+        }
+
+        /* CTA Section */
+        .final-cta {
+            padding: 6rem 2rem;
+            text-align: center;
+            background: linear-gradient(180deg, #0F172A 0%, #1A243B 100%);
+        }
+
+        .final-cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .final-cta h2 span { color: #00D47E; }
+
+        .final-cta p {
+            color: #94A3B8;
+            font-size: 1.15rem;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            color: #475569;
+            font-size: 0.9rem;
+            border-top: 1px solid #1E293B;
+        }
+
+        footer a { color: #00D47E; text-decoration: none; }
+
+        /* Mobile */
+        @media (max-width: 640px) {
+            .cta-form { flex-direction: column; align-items: center; }
+            .cta-form input { width: 100%; max-width: 320px; }
+            .step { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="logo">KlaarBoek</div>
+        <h1>Boekhouding op <span>autopilot</span> voor ZZP'ers</h1>
+        <p class="subtitle">Koppel je bank, en KlaarBoek doet de rest. Automatische transactieclassificatie, BTW-aangifte en financieel overzicht. Geen boekhouder nodig.</p>
+        <form class="cta-form" onsubmit="handleSubmit(event)">
+            <input type="email" placeholder="je@email.nl" required id="email-input">
+            <button type="submit">Schrijf je in voor de waitlist</button>
+        </form>
+        <p class="cta-note">Gratis. Geen spam. We laten je weten wanneer we live gaan.</p>
+    </div>
+</section>
+
+<section class="stats">
+    <div class="stats-grid">
+        <div>
+            <div class="stat-number">1.2M</div>
+            <div class="stat-label">ZZP'ers in Nederland</div>
+        </div>
+        <div>
+            <div class="stat-number">95%</div>
+            <div class="stat-label">Automatische classificatie</div>
+        </div>
+        <div>
+            <div class="stat-number">&euro;9,99</div>
+            <div class="stat-label">Per maand, alles inclusief</div>
+        </div>
+        <div>
+            <div class="stat-number">0</div>
+            <div class="stat-label">Handmatige invoer nodig</div>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <h2>Alles wat je nodig hebt. <span>Niets meer.</span></h2>
+    <p class="features-subtitle">KlaarBoek vervangt je boekhouder, niet je verstand.</p>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">&#127974;</div>
+            <h3>Automatische bank sync</h3>
+            <p>Koppel je ING, Rabobank of ABN AMRO. Transacties worden automatisch geimporteerd via PSD2 Open Banking. Veilig en read-only.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#129302;</div>
+            <h3>AI-classificatie</h3>
+            <p>Onze AI categoriseert 95%+ van je transacties automatisch. Zakelijk of prive, BTW-tarief, kostentype. Jij hoeft alleen te bevestigen.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128200;</div>
+            <h3>BTW op autopilot</h3>
+            <p>Automatische BTW-berekening per kwartaal. 21%, 9%, 0% of vrijgesteld. Je aangifte staat klaar om in te dienen.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128196;</div>
+            <h3>Professionele facturen</h3>
+            <p>Maak en verstuur facturen in seconden. Automatische nummering, je eigen logo, en wettelijk compliant Nederlands format.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128202;</div>
+            <h3>Real-time dashboard</h3>
+            <p>Inkomsten, uitgaven, winst en BTW-schuld in een oogopslag. Zie je financiele situatie in 10 seconden.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128274;</div>
+            <h3>Veilig en privaat</h3>
+            <p>GDPR-compliant. Data versleuteld. Geen opslag van bankgegevens. Wij zien je transacties, niet je wachtwoord.</p>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <h2>Hoe het <span>werkt</span></h2>
+    <div class="steps">
+        <div class="step">
+            <div class="step-number">1</div>
+            <div>
+                <h3>Koppel je bankrekening</h3>
+                <p>Verbind je zakelijke rekening via Open Banking. Duurt 2 minuten. Veilig via Nordigen, dezelfde technologie die banken zelf gebruiken.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div>
+                <h3>KlaarBoek doet de rest</h3>
+                <p>Transacties worden automatisch gecategoriseerd door onze AI. Zakelijk of prive, BTW-tarief, kostentype. Alles wordt voor je gesorteerd.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div>
+                <h3>Dien je BTW-aangifte in</h3>
+                <p>Elk kwartaal staat je aangifte klaar. Download, controleer, en dien in bij de Belastingdienst. Klaar in 5 minuten in plaats van 5 uur.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pricing">
+    <h2>Een prijs. <span>Alles erbij.</span></h2>
+    <p class="pricing-subtitle">Geen verborgen kosten. Geen verrassingen. Gewoon boekhouding die werkt.</p>
+    <div class="pricing-card">
+        <div class="price">&euro;9,99</div>
+        <div class="price-period">per maand</div>
+        <ul class="pricing-features">
+            <li>Onbeperkt transacties</li>
+            <li>Automatische AI-classificatie</li>
+            <li>BTW-aangifte elk kwartaal</li>
+            <li>Professionele facturen</li>
+            <li>Real-time dashboard</li>
+            <li>Bank sync (alle Nederlandse banken)</li>
+            <li>GDPR-compliant dataopslag</li>
+        </ul>
+        <a href="#" class="pricing-cta" onclick="document.getElementById('email-input').focus(); window.scrollTo({top: 0, behavior: 'smooth'}); return false;">Start nu</a>
+    </div>
+</section>
+
+<section class="final-cta">
+    <h2>Klaar om je boekhouding te <span>automatiseren</span>?</h2>
+    <p>Schrijf je in voor de waitlist en wees een van de eersten die KlaarBoek uitprobeert. Gratis tijdens de beta.</p>
+    <form class="cta-form" onsubmit="handleSubmit(event)">
+        <input type="email" placeholder="je@email.nl" required>
+        <button type="submit">Ik wil erbij!</button>
+    </form>
+</section>
+
+<footer>
+    <p>&copy; 2026 KlaarBoek. Gebouwd door het Bot Squad. <a href="https://github.com/finneijsten/klaarboek" target="_blank">GitHub</a></p>
+</footer>
+
+<script>
+function handleSubmit(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    const input = e.target.querySelector('input');
+    btn.textContent = 'Je staat op de lijst!';
+    btn.style.background = '#1A243B';
+    btn.style.color = '#00D47E';
+    btn.style.border = '2px solid #00D47E';
+    input.value = '';
+    setTimeout(() => {
+        btn.textContent = btn.textContent.includes('Ik') ? 'Ik wil erbij!' : 'Schrijf je in voor de waitlist';
+        btn.style.background = '#00D47E';
+        btn.style.color = '#0F172A';
+        btn.style.border = 'none';
+    }, 3000);
+}
+</script>
+
+</body>
+</html>
