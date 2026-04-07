@@ -1,10 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 
-from app.database import get_db
-from app.models.user import User
-from app.models.bank import Transaction, BankConnection
+from app.database import SupabaseClient, get_db
 from app.schemas.transaction import TransactionCreate, TransactionResponse, DashboardSummary
 from app.auth import get_current_user
 
@@ -15,84 +11,78 @@ router = APIRouter(prefix="/transactions", tags=["transactions"])
 async def list_transactions(
     limit: int = 50,
     offset: int = 0,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
 ):
-    result = await db.execute(
-        select(Transaction)
-        .join(BankConnection)
-        .where(BankConnection.user_id == user.id)
-        .order_by(Transaction.date.desc())
-        .limit(limit)
-        .offset(offset)
-    )
-    return result.scalars().all()
+    # Get user's bank connections
+    connections = await db.select("bank_connections", columns="id", filters={"user_id": user["id"]})
+    if not connections:
+        return []
+
+    conn_ids = [c["id"] for c in connections]
+
+    # Get transactions for those connections
+    all_transactions = []
+    for conn_id in conn_ids:
+        txs = await db.select(
+            "transactions",
+            filters={"bank_connection_id": conn_id},
+            order="date.desc",
+            limit=limit,
+            offset=offset,
+        )
+        all_transactions.extend(txs)
+
+    # Sort by date descending and apply limit
+    all_transactions.sort(key=lambda x: x.get("date", ""), reverse=True)
+    return all_transactions[:limit]
 
 
 @router.post("/", response_model=TransactionResponse, status_code=201)
 async def create_transaction(
     data: TransactionCreate,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
 ):
     # Verify bank connection belongs to user
-    result = await db.execute(
-        select(BankConnection).where(
-            BankConnection.id == data.bank_connection_id,
-            BankConnection.user_id == user.id,
-        )
-    )
-    if not result.scalar_one_or_none():
+    connections = await db.select("bank_connections", filters={
+        "id": data.bank_connection_id,
+        "user_id": user["id"],
+    })
+    if not connections:
         raise HTTPException(status_code=404, detail="Bank connection not found")
 
-    tx = Transaction(**data.model_dump())
-    db.add(tx)
-    await db.commit()
-    await db.refresh(tx)
+    tx = await db.insert("transactions", data.model_dump(mode="json"))
     return tx
 
 
 @router.get("/dashboard", response_model=DashboardSummary)
 async def dashboard_summary(
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
 ):
-    base_query = (
-        select(Transaction)
-        .join(BankConnection)
-        .where(BankConnection.user_id == user.id)
-    )
+    # Get user's bank connections
+    connections = await db.select("bank_connections", columns="id", filters={"user_id": user["id"]})
 
-    income_result = await db.execute(
-        select(func.coalesce(func.sum(Transaction.amount), 0))
-        .select_from(Transaction)
-        .join(BankConnection)
-        .where(BankConnection.user_id == user.id, Transaction.is_income == True)
-    )
-    total_income = float(income_result.scalar())
+    if not connections:
+        return DashboardSummary(
+            total_income=0, total_expenses=0, btw_owed=0, profit=0, transaction_count=0
+        )
 
-    expense_result = await db.execute(
-        select(func.coalesce(func.sum(func.abs(Transaction.amount)), 0))
-        .select_from(Transaction)
-        .join(BankConnection)
-        .where(BankConnection.user_id == user.id, Transaction.is_income == False)
-    )
-    total_expenses = float(expense_result.scalar())
+    # Get all transactions
+    all_transactions = []
+    for conn in connections:
+        txs = await db.select("transactions", filters={"bank_connection_id": conn["id"]})
+        all_transactions.extend(txs)
 
-    count_result = await db.execute(
-        select(func.count(Transaction.id))
-        .select_from(Transaction)
-        .join(BankConnection)
-        .where(BankConnection.user_id == user.id)
-    )
-    count = int(count_result.scalar())
-
-    btw_owed = total_income * 0.21 - total_expenses * 0.21  # simplified
+    total_income = sum(t["amount"] for t in all_transactions if t.get("is_income"))
+    total_expenses = sum(abs(t["amount"]) for t in all_transactions if not t.get("is_income"))
+    btw_owed = round(total_income * 0.21 - total_expenses * 0.21, 2)
 
     return DashboardSummary(
         total_income=total_income,
         total_expenses=total_expenses,
-        btw_owed=round(btw_owed, 2),
+        btw_owed=btw_owed,
         profit=round(total_income - total_expenses, 2),
-        transaction_count=count,
+        transaction_count=len(all_transactions),
     )
