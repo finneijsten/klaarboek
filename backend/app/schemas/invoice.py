@@ -22,15 +22,17 @@ class InvoiceUpdate(BaseModel):
 class InvoiceResponse(BaseModel):
     id: int
     user_id: int
-    invoice_number: str | None
+    invoice_number: str | None = None
     client_name: str
     amount_excl_btw: float
-    btw_rate: float
+    btw_rate: float | str
     btw_amount: float
     amount_incl_btw: float
-    due_date: str | None
+    due_date: str | None = None
     is_paid: bool
-    matched_transaction_id: int | None
+    matched_transaction_id: int | None = None
+    client_email: str | None = None
+    description: str | None = None
     created_at: datetime
 
     class Config:

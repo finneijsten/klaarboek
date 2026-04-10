@@ -16,10 +16,16 @@ async def join_waitlist(
     data: WaitlistSignup,
     db: SupabaseClient = Depends(get_db),
 ):
-    # Check for duplicate
-    existing = await db.select("waitlist", filters={"email": data.email})
-    if existing:
-        return {"message": "Je staat al op de wachtlijst!"}
+    try:
+        # Check for duplicate
+        existing = await db.select("waitlist", filters={"email": data.email})
+        if existing:
+            return {"message": "Je staat al op de wachtlijst!"}
 
-    await db.insert("waitlist", {"email": data.email})
-    return {"message": "Je bent aangemeld voor de wachtlijst!"}
+        await db.insert("waitlist", {"email": data.email})
+        return {"message": "Je bent aangemeld voor de wachtlijst!"}
+    except Exception:
+        raise HTTPException(
+            status_code=503,
+            detail="Waitlist is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
+        )
