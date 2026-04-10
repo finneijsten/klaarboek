@@ -19,14 +19,14 @@ def test_create_invoice(client, mock_db):
     assert data["amount_excl_btw"] == 1000.0
     assert data["btw_amount"] == 210.0
     assert data["amount_incl_btw"] == 1210.0
-    assert data["invoice_number"] == "KB-0001"
+    assert data["invoice_number"] == "KB-1-0001"
     assert data["is_paid"] is False
 
 
 def test_create_invoice_auto_number(client, mock_db):
     client.post("/invoices/", json={"client_name": "A", "amount_excl_btw": 100, "btw_rate": 21.0})
     res = client.post("/invoices/", json={"client_name": "B", "amount_excl_btw": 200, "btw_rate": 21.0})
-    assert res.json()["invoice_number"] == "KB-0002"
+    assert res.json()["invoice_number"] == "KB-1-0002"
 
 
 def test_update_invoice_paid(client, mock_db):
