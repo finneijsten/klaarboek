@@ -39,7 +39,7 @@ async def create_invoice(
     invoice_number = data.invoice_number
     if not invoice_number:
         existing = await db.select("invoices", columns="id", filters={"user_id": user["id"]})
-        invoice_number = f"KB-{len(existing) + 1:04d}"
+        invoice_number = f"KB-{user['id']}-{len(existing) + 1:04d}"
 
     invoice = await db.insert("invoices", {
         "user_id": user["id"],
