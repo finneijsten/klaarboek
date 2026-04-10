@@ -32,7 +32,7 @@ async def login(form: OAuth2PasswordRequestForm = Depends(), db: SupabaseClient 
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     user = users[0]
-    token = create_access_token({"sub": user["id"]})
+    token = create_access_token({"sub": str(user["id"])})
     return Token(access_token=token)
 
 

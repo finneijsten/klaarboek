@@ -11,7 +11,7 @@ export default function Home() {
           <Link href="/login" className="px-4 py-2 text-sm font-medium text-[#2D3436] hover:text-[#0D9668]">
             Inloggen
           </Link>
-          <Link href="/signup" className="px-4 py-2 text-sm font-medium bg-[#0D9668] text-white rounded-lg hover:bg-[#0A7B55]">
+          <Link href="/register" className="px-4 py-2 text-sm font-medium bg-[#0D9668] text-white rounded-lg hover:bg-[#0A7B55]">
             Gratis starten
           </Link>
         </div>
