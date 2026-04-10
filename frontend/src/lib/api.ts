@@ -80,6 +80,46 @@ class ApiClient {
     return data;
   }
 
+  async getProfile() {
+    return this.request<{
+      id: number;
+      email: string;
+      kvk_number: string | null;
+      btw_number: string | null;
+      company_name: string | null;
+      created_at: string;
+    }>("/auth/me");
+  }
+
+  async updateProfile(data: { company_name?: string; kvk_number?: string; btw_number?: string }) {
+    return this.request<{
+      id: number;
+      email: string;
+      kvk_number: string | null;
+      btw_number: string | null;
+      company_name: string | null;
+      created_at: string;
+    }>("/auth/me", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Transactions update
+  async updateTransaction(id: number, data: {
+    category?: string;
+    btw_rate?: string;
+    is_business?: boolean;
+    is_income?: boolean;
+    description?: string;
+    counterparty?: string;
+  }) {
+    return this.request(`/transactions/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
   // Dashboard
   async getDashboard() {
     return this.request<{

@@ -7,16 +7,19 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 from app.config import settings
-from app.database import Base
-from app.models import User, BankConnection, Transaction, Invoice, BTWDeclaration
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.database_url)
+config.set_main_option(
+    "sqlalchemy.url",
+    f"postgresql+asyncpg://{settings.supabase_url.replace('https://', '')}:5432/postgres"
+    if settings.supabase_url
+    else "postgresql+asyncpg://localhost:5432/klaarboek",
+)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = Base.metadata
+target_metadata = None
 
 
 def run_migrations_offline() -> None:

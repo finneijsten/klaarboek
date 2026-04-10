@@ -13,6 +13,15 @@ type BankConnection = {
   connected_at: string;
 };
 
+type Profile = {
+  id: number;
+  email: string;
+  company_name: string | null;
+  kvk_number: string | null;
+  btw_number: string | null;
+  created_at: string;
+};
+
 export default function SettingsPage() {
   const router = useRouter();
   const [banks, setBanks] = useState<BankConnection[]>([]);
@@ -25,10 +34,51 @@ export default function SettingsPage() {
   const [iban, setIban] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Profile
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [companyName, setCompanyName] = useState("");
+  const [kvkNumber, setKvkNumber] = useState("");
+  const [btwNumber, setBtwNumber] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
+
   useEffect(() => {
     if (!api.isLoggedIn()) { router.push("/login"); return; }
     fetchBanks();
+    fetchProfile();
   }, [router]);
+
+  async function fetchProfile() {
+    try {
+      const data = await api.getProfile();
+      setProfile(data);
+      setCompanyName(data.company_name || "");
+      setKvkNumber(data.kvk_number || "");
+      setBtwNumber(data.btw_number || "");
+    } catch {
+      // Profile fetch failed, non-critical
+    }
+  }
+
+  async function handleSaveProfile(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingProfile(true);
+    setProfileSaved(false);
+    try {
+      const updated = await api.updateProfile({
+        company_name: companyName || undefined,
+        kvk_number: kvkNumber || undefined,
+        btw_number: btwNumber || undefined,
+      });
+      setProfile(updated);
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Fout bij opslaan profiel");
+    } finally {
+      setSavingProfile(false);
+    }
+  }
 
   async function fetchBanks() {
     try {
@@ -171,12 +221,65 @@ export default function SettingsPage() {
             )}
           </div>
 
-          {/* Account info */}
+          {/* Profile */}
           <div className="bg-white rounded-2xl border border-[#E0DCD5] p-6">
-            <h2 className="text-lg font-bold text-[#1A1A2E] mb-4">Account</h2>
-            <p className="text-sm text-[#636E72]">
-              Profielinstellingen en bedrijfsgegevens worden binnenkort beschikbaar.
-            </p>
+            <h2 className="text-lg font-bold text-[#1A1A2E] mb-4">Bedrijfsgegevens</h2>
+            {profile && (
+              <form onSubmit={handleSaveProfile}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-[#636E72] mb-1">E-mail</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={profile.email}
+                      className="w-full px-4 py-2 rounded-lg border border-[#E0DCD5] text-sm text-[#636E72] bg-[#F5F3EF]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-[#636E72] mb-1">Bedrijfsnaam</label>
+                    <input
+                      type="text"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      className="w-full px-4 py-2 rounded-lg border border-[#E0DCD5] text-sm text-[#1A1A2E] focus:outline-none focus:border-[#0D9668]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-[#636E72] mb-1">KVK-nummer</label>
+                    <input
+                      type="text"
+                      value={kvkNumber}
+                      onChange={(e) => setKvkNumber(e.target.value)}
+                      placeholder="12345678"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E0DCD5] text-sm text-[#1A1A2E] placeholder-[#636E72] focus:outline-none focus:border-[#0D9668]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-[#636E72] mb-1">BTW-nummer</label>
+                    <input
+                      type="text"
+                      value={btwNumber}
+                      onChange={(e) => setBtwNumber(e.target.value)}
+                      placeholder="NL000000000B01"
+                      className="w-full px-4 py-2 rounded-lg border border-[#E0DCD5] text-sm text-[#1A1A2E] placeholder-[#636E72] focus:outline-none focus:border-[#0D9668]"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 mt-4">
+                  <button
+                    type="submit"
+                    disabled={savingProfile}
+                    className="px-6 py-2 bg-[#0D9668] text-white rounded-lg text-sm font-medium hover:bg-[#0B7D56] disabled:opacity-50"
+                  >
+                    {savingProfile ? "Opslaan..." : "Opslaan"}
+                  </button>
+                  {profileSaved && (
+                    <span className="text-sm text-[#0D9668] font-medium">Opgeslagen!</span>
+                  )}
+                </div>
+              </form>
+            )}
           </div>
         </main>
       </div>

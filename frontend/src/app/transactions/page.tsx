@@ -18,6 +18,11 @@ type Transaction = {
   classified_by: string;
 };
 
+const CATEGORIES = [
+  "Omzet", "Materiaal", "Kantoor", "Transport", "Verzekeringen",
+  "Abonnementen", "Marketing", "Personeel", "Huisvesting", "Overig",
+];
+
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(amount);
 }
@@ -34,6 +39,9 @@ export default function TransactionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editCategory, setEditCategory] = useState("");
+  const [editBtw, setEditBtw] = useState("");
 
   useEffect(() => {
     if (!api.isLoggedIn()) { router.push("/login"); return; }
@@ -50,6 +58,27 @@ export default function TransactionsPage() {
     }
     fetchData();
   }, [router]);
+
+  function startEdit(tx: Transaction) {
+    setEditingId(tx.id);
+    setEditCategory(tx.category || "");
+    setEditBtw(tx.btw_rate || "21");
+  }
+
+  async function saveEdit(tx: Transaction) {
+    try {
+      await api.updateTransaction(tx.id, {
+        category: editCategory || undefined,
+        btw_rate: editBtw || undefined,
+      });
+      setTransactions(transactions.map((t) =>
+        t.id === tx.id ? { ...t, category: editCategory || null, btw_rate: editBtw || null } : t
+      ));
+      setEditingId(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Fout bij opslaan");
+    }
+  }
 
   const filtered = transactions.filter((tx) => {
     const matchSearch =
@@ -142,6 +171,7 @@ export default function TransactionsPage() {
                         <th className="pb-3">Categorie</th>
                         <th className="pb-3">BTW</th>
                         <th className="pb-3 text-right">Bedrag</th>
+                        <th className="pb-3 w-20"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -153,19 +183,79 @@ export default function TransactionsPage() {
                           </td>
                           <td className="py-3 text-sm text-[#636E72]">{tx.counterparty || "—"}</td>
                           <td className="py-3">
-                            {tx.category ? (
-                              <span className="text-xs bg-[#EDEAE4] text-[#636E72] px-2 py-1 rounded-full">
+                            {editingId === tx.id ? (
+                              <select
+                                value={editCategory}
+                                onChange={(e) => setEditCategory(e.target.value)}
+                                className="text-xs px-2 py-1 rounded border border-[#0D9668] bg-white text-[#1A1A2E] focus:outline-none"
+                              >
+                                <option value="">Geen</option>
+                                {CATEGORIES.map((c) => (
+                                  <option key={c} value={c}>{c}</option>
+                                ))}
+                              </select>
+                            ) : tx.category ? (
+                              <span
+                                onClick={() => startEdit(tx)}
+                                className="text-xs bg-[#EDEAE4] text-[#636E72] px-2 py-1 rounded-full cursor-pointer hover:bg-[#E0DCD5]"
+                              >
                                 {tx.category}
                               </span>
                             ) : (
-                              <span className="text-xs text-[#636E72]">—</span>
+                              <span
+                                onClick={() => startEdit(tx)}
+                                className="text-xs text-[#636E72] cursor-pointer hover:text-[#0D9668]"
+                              >
+                                + categorie
+                              </span>
                             )}
                           </td>
-                          <td className="py-3 text-sm text-[#636E72]">{tx.btw_rate ? `${tx.btw_rate}%` : "—"}</td>
+                          <td className="py-3">
+                            {editingId === tx.id ? (
+                              <select
+                                value={editBtw}
+                                onChange={(e) => setEditBtw(e.target.value)}
+                                className="text-xs px-2 py-1 rounded border border-[#0D9668] bg-white text-[#1A1A2E] focus:outline-none"
+                              >
+                                <option value="21">21%</option>
+                                <option value="9">9%</option>
+                                <option value="0">0%</option>
+                              </select>
+                            ) : (
+                              <span className="text-sm text-[#636E72]">
+                                {tx.btw_rate ? `${tx.btw_rate}%` : "—"}
+                              </span>
+                            )}
+                          </td>
                           <td className={`py-3 text-sm text-right font-medium ${
                             tx.is_income ? "text-[#0D9668]" : "text-[#1A1A2E]"
                           }`}>
                             {tx.is_income ? "+" : "-"}{formatCurrency(Math.abs(tx.amount))}
+                          </td>
+                          <td className="py-3 text-right">
+                            {editingId === tx.id ? (
+                              <div className="flex gap-1 justify-end">
+                                <button
+                                  onClick={() => saveEdit(tx)}
+                                  className="text-xs px-2 py-1 bg-[#0D9668] text-white rounded hover:bg-[#0B7D56]"
+                                >
+                                  OK
+                                </button>
+                                <button
+                                  onClick={() => setEditingId(null)}
+                                  className="text-xs px-2 py-1 text-[#636E72] hover:text-[#1A1A2E]"
+                                >
+                                  X
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => startEdit(tx)}
+                                className="text-xs text-[#636E72] hover:text-[#0D9668]"
+                              >
+                                Bewerk
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}

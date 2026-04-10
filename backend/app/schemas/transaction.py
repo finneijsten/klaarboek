@@ -32,6 +32,15 @@ class TransactionResponse(BaseModel):
         from_attributes = True
 
 
+class TransactionUpdate(BaseModel):
+    category: str | None = None
+    btw_rate: str | None = None
+    is_business: bool | None = None
+    is_income: bool | None = None
+    description: str | None = None
+    counterparty: str | None = None
+
+
 class DashboardSummary(BaseModel):
     total_income: float
     total_expenses: float

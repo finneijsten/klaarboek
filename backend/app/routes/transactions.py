@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.database import SupabaseClient, get_db
-from app.schemas.transaction import TransactionCreate, TransactionResponse, DashboardSummary
+from app.schemas.transaction import TransactionCreate, TransactionUpdate, TransactionResponse, DashboardSummary
 from app.auth import get_current_user
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
@@ -54,6 +54,29 @@ async def create_transaction(
 
     tx = await db.insert("transactions", data.model_dump(mode="json"))
     return tx
+
+
+@router.patch("/{transaction_id}", response_model=TransactionResponse)
+async def update_transaction(
+    transaction_id: int,
+    data: TransactionUpdate,
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    # Verify transaction belongs to user via bank connection
+    connections = await db.select("bank_connections", columns="id", filters={"user_id": user["id"]})
+    conn_ids = [c["id"] for c in connections] if connections else []
+
+    txs = await db.select("transactions", filters={"id": transaction_id})
+    if not txs or txs[0].get("bank_connection_id") not in conn_ids:
+        raise HTTPException(status_code=404, detail="Transactie niet gevonden")
+
+    update_data = data.model_dump(exclude_none=True)
+    if not update_data:
+        return txs[0]
+
+    result = await db.update("transactions", {"id": transaction_id}, update_data)
+    return result[0]
 
 
 @router.get("/dashboard", response_model=DashboardSummary)

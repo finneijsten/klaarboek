@@ -22,6 +22,12 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 
+class UserUpdate(BaseModel):
+    company_name: str | None = None
+    kvk_number: str | None = None
+    btw_number: str | None = None
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
