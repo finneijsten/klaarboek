@@ -126,6 +126,115 @@ class ApiClient {
     });
   }
 
+  // Invoices
+  async getInvoices(limit = 50, offset = 0) {
+    return this.request<Array<{
+      id: number;
+      user_id: number;
+      invoice_number: string | null;
+      client_name: string;
+      amount_excl_btw: number;
+      btw_rate: number;
+      btw_amount: number;
+      amount_incl_btw: number;
+      due_date: string | null;
+      is_paid: boolean;
+      matched_transaction_id: number | null;
+      created_at: string;
+    }>>(`/invoices/?limit=${limit}&offset=${offset}`);
+  }
+
+  async createInvoice(data: {
+    client_name: string;
+    invoice_number?: string;
+    amount_excl_btw: number;
+    btw_rate?: number;
+    due_date?: string;
+  }) {
+    return this.request("/invoices/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateInvoice(id: number, data: {
+    client_name?: string;
+    amount_excl_btw?: number;
+    btw_rate?: number;
+    due_date?: string;
+    is_paid?: boolean;
+  }) {
+    return this.request(`/invoices/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteInvoice(id: number) {
+    return this.request(`/invoices/${id}`, { method: "DELETE" });
+  }
+
+  // BTW
+  async getBTWDeclarations() {
+    return this.request<Array<{
+      id: number;
+      user_id: number;
+      year: number;
+      quarter: number;
+      total_income: number;
+      total_expenses: number;
+      btw_collected: number;
+      btw_paid: number;
+      btw_owed: number;
+      status: string;
+      submitted_at: string | null;
+      created_at: string;
+    }>>("/btw/declarations");
+  }
+
+  async calculateBTW(year: number, quarter: number) {
+    return this.request<{
+      year: number;
+      quarter: number;
+      total_income: number;
+      total_expenses: number;
+      btw_collected: number;
+      btw_paid: number;
+      btw_owed: number;
+      transaction_count: number;
+    }>(`/btw/calculate?year=${year}&quarter=${quarter}`);
+  }
+
+  async saveBTWDeclaration(year: number, quarter: number) {
+    return this.request("/btw/declarations", {
+      method: "POST",
+      body: JSON.stringify({ year, quarter }),
+    });
+  }
+
+  // Bank connections
+  async getBankConnections() {
+    return this.request<Array<{
+      id: number;
+      user_id: number;
+      bank_name: string;
+      iban: string;
+      is_active: boolean;
+      connected_at: string;
+    }>>("/banks/");
+  }
+
+  async createBankConnection(data: { bank_name: string; iban: string }) {
+    return this.request("/banks/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteBankConnection(id: number) {
+    return this.request(`/banks/${id}`, { method: "DELETE" });
+  }
+
   isLoggedIn() {
     return !!this.token;
   }

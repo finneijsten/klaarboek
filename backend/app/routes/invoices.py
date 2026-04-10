@@ -1,0 +1,90 @@
+from fastapi import APIRouter, Depends, HTTPException
+
+from app.database import SupabaseClient, get_db
+from app.schemas.invoice import InvoiceCreate, InvoiceUpdate, InvoiceResponse
+from app.auth import get_current_user
+
+router = APIRouter(prefix="/invoices", tags=["invoices"])
+
+
+@router.get("/", response_model=list[InvoiceResponse])
+async def list_invoices(
+    limit: int = 50,
+    offset: int = 0,
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    invoices = await db.select(
+        "invoices",
+        filters={"user_id": user["id"]},
+        order="created_at.desc",
+        limit=limit,
+        offset=offset,
+    )
+    return invoices
+
+
+@router.post("/", response_model=InvoiceResponse, status_code=201)
+async def create_invoice(
+    data: InvoiceCreate,
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    btw_amount = round(data.amount_excl_btw * (data.btw_rate / 100), 2)
+    amount_incl_btw = round(data.amount_excl_btw + btw_amount, 2)
+
+    # Generate invoice number if not provided
+    invoice_number = data.invoice_number
+    if not invoice_number:
+        existing = await db.select("invoices", columns="id", filters={"user_id": user["id"]})
+        invoice_number = f"KB-{len(existing) + 1:04d}"
+
+    invoice = await db.insert("invoices", {
+        "user_id": user["id"],
+        "invoice_number": invoice_number,
+        "client_name": data.client_name,
+        "amount_excl_btw": data.amount_excl_btw,
+        "btw_rate": data.btw_rate,
+        "btw_amount": btw_amount,
+        "amount_incl_btw": amount_incl_btw,
+        "due_date": data.due_date,
+        "is_paid": False,
+    })
+    return invoice
+
+
+@router.patch("/{invoice_id}", response_model=InvoiceResponse)
+async def update_invoice(
+    invoice_id: int,
+    data: InvoiceUpdate,
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    existing = await db.select("invoices", filters={"id": invoice_id, "user_id": user["id"]})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Factuur niet gevonden")
+
+    update_data = data.model_dump(exclude_none=True)
+
+    # Recalculate BTW if amounts changed
+    if "amount_excl_btw" in update_data or "btw_rate" in update_data:
+        excl = update_data.get("amount_excl_btw", existing[0]["amount_excl_btw"])
+        rate = update_data.get("btw_rate", existing[0]["btw_rate"])
+        update_data["btw_amount"] = round(excl * (rate / 100), 2)
+        update_data["amount_incl_btw"] = round(excl + update_data["btw_amount"], 2)
+
+    result = await db.update("invoices", {"id": invoice_id, "user_id": user["id"]}, update_data)
+    return result[0]
+
+
+@router.delete("/{invoice_id}", status_code=204)
+async def delete_invoice(
+    invoice_id: int,
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    existing = await db.select("invoices", filters={"id": invoice_id, "user_id": user["id"]})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Factuur niet gevonden")
+
+    await db.delete("invoices", {"id": invoice_id, "user_id": user["id"]})
