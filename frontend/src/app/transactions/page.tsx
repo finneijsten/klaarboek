@@ -103,7 +103,26 @@ export default function TransactionsPage() {
       <div className="flex">
         <Sidebar />
         <main className="flex-1 p-8">
-          <h1 className="text-2xl font-bold text-[#1A1A2E] mb-8">Transacties</h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-2xl font-bold text-[#1A1A2E]">Transacties</h1>
+            <button
+              onClick={async () => {
+                try {
+                  const result = await api.classifyTransactions();
+                  if (result.classified > 0) {
+                    const data = await api.getTransactions(200);
+                    setTransactions(data);
+                  }
+                  alert(`${result.classified} transactie(s) automatisch gecategoriseerd`);
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Fout bij classificeren");
+                }
+              }}
+              className="px-4 py-2 bg-[#1A1A2E] text-white rounded-lg text-sm font-medium hover:bg-[#2A2A3E]"
+            >
+              Auto-categoriseren
+            </button>
+          </div>
 
           {loading && (
             <div className="flex items-center justify-center h-64">

@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 
 from app.database import SupabaseClient, get_db
 from app.schemas.invoice import InvoiceCreate, InvoiceUpdate, InvoiceResponse
 from app.auth import get_current_user
+from app.pdf import generate_invoice_pdf
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
 
@@ -88,3 +90,24 @@ async def delete_invoice(
         raise HTTPException(status_code=404, detail="Factuur niet gevonden")
 
     await db.delete("invoices", {"id": invoice_id, "user_id": user["id"]})
+
+
+@router.get("/{invoice_id}/pdf")
+async def download_invoice_pdf(
+    invoice_id: int,
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    existing = await db.select("invoices", filters={"id": invoice_id, "user_id": user["id"]})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Factuur niet gevonden")
+
+    invoice = existing[0]
+    pdf_bytes = generate_invoice_pdf(invoice, user)
+    filename = f"factuur_{invoice.get('invoice_number', invoice_id)}.pdf"
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

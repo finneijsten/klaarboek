@@ -120,6 +120,10 @@ class ApiClient {
     });
   }
 
+  async classifyTransactions() {
+    return this.request<{ classified: number }>("/transactions/classify", { method: "POST" });
+  }
+
   // Dashboard
   async getDashboard() {
     return this.request<{
@@ -212,6 +216,22 @@ class ApiClient {
 
   async deleteInvoice(id: number) {
     return this.request(`/invoices/${id}`, { method: "DELETE" });
+  }
+
+  async downloadInvoicePdf(id: number) {
+    const headers: Record<string, string> = {};
+    if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
+
+    const res = await fetch(`${API_BASE}/invoices/${id}/pdf`, { headers });
+    if (!res.ok) throw new Error("PDF download mislukt");
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `factuur_${id}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   // BTW

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import auth, transactions, invoices, btw, banks
+from app.routes import auth, transactions, invoices, btw, banks, waitlist
 
 app = FastAPI(
     title="KlaarBoek API",
@@ -22,6 +22,7 @@ app.include_router(transactions.router)
 app.include_router(invoices.router)
 app.include_router(btw.router)
 app.include_router(banks.router)
+app.include_router(waitlist.router)
 
 
 @app.get("/")

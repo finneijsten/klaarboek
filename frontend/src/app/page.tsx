@@ -1,4 +1,5 @@
 import Link from "next/link";
+import WaitlistForm from "@/components/WaitlistForm";
 
 export default function Home() {
   return (
@@ -25,16 +26,7 @@ export default function Home() {
           Koppel je bank, en KlaarBoek doet de rest. Automatische transactieclassificatie,
           BTW-aangifte en financieel overzicht.
         </p>
-        <div className="flex gap-3 flex-wrap justify-center">
-          <input
-            type="email"
-            placeholder="je@email.nl"
-            className="px-6 py-3 border-2 border-[#D5D0C8] rounded-xl bg-white text-[#2D3436] w-80 outline-none focus:border-[#0D9668]"
-          />
-          <button className="px-6 py-3 bg-[#0D9668] text-white font-bold rounded-xl hover:bg-[#0A7B55] transition-all">
-            Schrijf je in
-          </button>
-        </div>
+        <WaitlistForm />
         <p className="text-sm text-[#B2BEC3] mt-3">Gratis. Geen spam. We laten je weten wanneer we live gaan.</p>
       </section>
 

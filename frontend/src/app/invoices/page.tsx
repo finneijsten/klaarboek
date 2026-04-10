@@ -216,6 +216,7 @@ export default function InvoicesPage() {
                         <th className="pb-3 text-right">Excl. BTW</th>
                         <th className="pb-3 text-right">Incl. BTW</th>
                         <th className="pb-3 text-center">Status</th>
+                        <th className="pb-3 w-16"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -245,6 +246,14 @@ export default function InvoicesPage() {
                               }`}
                             >
                               {inv.is_paid ? "Betaald" : "Open"}
+                            </button>
+                          </td>
+                          <td className="py-3 text-center">
+                            <button
+                              onClick={() => api.downloadInvoicePdf(inv.id)}
+                              className="text-xs text-[#0D9668] hover:text-[#0B7D56] font-medium"
+                            >
+                              PDF
                             </button>
                           </td>
                         </tr>

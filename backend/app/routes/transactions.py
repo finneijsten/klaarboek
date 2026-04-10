@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.database import SupabaseClient, get_db
 from app.schemas.transaction import TransactionCreate, TransactionUpdate, TransactionResponse, DashboardSummary
 from app.auth import get_current_user
+from app.classifier import classify_transaction
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -52,7 +53,14 @@ async def create_transaction(
     if not connections:
         raise HTTPException(status_code=404, detail="Bank connection not found")
 
-    tx = await db.insert("transactions", data.model_dump(mode="json"))
+    tx_data = data.model_dump(mode="json")
+
+    # Auto-classify if no category provided
+    if not tx_data.get("category"):
+        classification = classify_transaction(tx_data.get("description"), tx_data.get("counterparty"))
+        tx_data.update(classification)
+
+    tx = await db.insert("transactions", tx_data)
     return tx
 
 
@@ -77,6 +85,33 @@ async def update_transaction(
 
     result = await db.update("transactions", {"id": transaction_id}, update_data)
     return result[0]
+
+
+@router.post("/classify")
+async def classify_all_transactions(
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    """Auto-classify all unclassified transactions for the current user."""
+    connections = await db.select("bank_connections", columns="id", filters={"user_id": user["id"]})
+    if not connections:
+        return {"classified": 0}
+
+    classified_count = 0
+    for conn in connections:
+        txs = await db.select("transactions", filters={
+            "bank_connection_id": conn["id"],
+            "classified_by": "manual",
+        })
+        for tx in txs:
+            if tx.get("category"):
+                continue
+            result = classify_transaction(tx.get("description"), tx.get("counterparty"))
+            if result["category"]:
+                await db.update("transactions", {"id": tx["id"]}, result)
+                classified_count += 1
+
+    return {"classified": classified_count}
 
 
 @router.get("/dashboard", response_model=DashboardSummary)
