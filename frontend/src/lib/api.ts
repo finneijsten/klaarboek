@@ -220,7 +220,7 @@ class ApiClient {
 
   async saveBTWDeclaration(year: number, quarter: number) {
     if (this.demoMode) return { id: 99, user_id: 1, year, quarter, total_income: 14000, total_expenses: 2850, btw_collected: 2940, btw_paid: 498.75, btw_owed: 2441.25, status: "concept", submitted_at: null, created_at: new Date().toISOString().split("T")[0] };
-    return this.request("/btw/declarations", { method: "POST", body: JSON.stringify({ year, quarter }) });
+    return this.request(`/btw/declarations?year=${year}&quarter=${quarter}`, { method: "POST" });
   }
 
   // Bank connections
