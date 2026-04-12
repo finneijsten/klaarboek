@@ -5,11 +5,11 @@ import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Transacties", href: "/transactions" },
-  { label: "Facturen", href: "/invoices" },
-  { label: "BTW-aangifte", href: "/btw" },
-  { label: "Instellingen", href: "/settings" },
+  { label: "Dashboard", href: "/dashboard", desc: "Overzicht" },
+  { label: "Transacties", href: "/transactions", desc: "Inkomsten & uitgaven" },
+  { label: "Facturen", href: "/invoices", desc: "Klanten factureren" },
+  { label: "BTW-aangifte", href: "/btw", desc: "Kwartaalberekening" },
+  { label: "Instellingen", href: "/settings", desc: "Account & bankrekeningen" },
 ];
 
 export default function Sidebar() {
@@ -24,13 +24,16 @@ export default function Sidebar() {
           <a
             key={item.label}
             href={item.href}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${
+            className={`px-4 py-2.5 rounded-lg ${
               pathname === item.href
                 ? "bg-[#0D9668] text-white"
-                : "text-[#636E72] hover:bg-[#EDEAE4]"
+                : "text-[#1A1A2E] hover:bg-[#EDEAE4]"
             }`}
           >
-            {item.label}
+            <span className="text-sm font-medium block">{item.label}</span>
+            <span className={`text-xs block ${
+              pathname === item.href ? "text-white/70" : "text-[#636E72]"
+            }`}>{item.desc}</span>
           </a>
         ))}
       </nav>

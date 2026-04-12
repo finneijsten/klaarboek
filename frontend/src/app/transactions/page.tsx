@@ -280,9 +280,19 @@ export default function TransactionsPage() {
               {/* Table */}
               <div className="bg-white rounded-2xl border border-[#E0DCD5] p-6">
                 {filtered.length === 0 ? (
-                  <p className="text-sm text-[#636E72] py-8 text-center">
-                    Geen transacties gevonden.
-                  </p>
+                  <div className="py-8 text-center">
+                    <p className="text-sm text-[#636E72] mb-3">
+                      {transactions.length === 0 ? "Nog geen transacties." : "Geen transacties gevonden voor je zoekopdracht."}
+                    </p>
+                    {transactions.length === 0 && !bankConnId && (
+                      <p className="text-sm text-[#636E72] mb-4">Voeg eerst een bankrekening toe bij <a href="/settings" className="text-[#0D9668] font-medium hover:underline">Instellingen</a>, daarna kan je hier transacties invoeren.</p>
+                    )}
+                    {transactions.length === 0 && bankConnId && (
+                      <button onClick={() => setShowAdd(true)} className="px-4 py-2 bg-[#0D9668] text-white rounded-lg text-sm font-medium hover:bg-[#0B7D56]">
+                        Eerste transactie toevoegen
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <table className="w-full">
                     <thead>

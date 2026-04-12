@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
@@ -82,6 +83,43 @@ export default function Dashboard() {
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-8">
               <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
+          {dashboard && dashboard.transaction_count === 0 && (
+            <div className="bg-white rounded-2xl border border-[#E0DCD5] p-8 mb-8">
+              <h2 className="text-xl font-bold text-[#1A1A2E] mb-2">Welkom bij KlaarBoek!</h2>
+              <p className="text-[#636E72] mb-6">Volg deze stappen om je boekhouding op te zetten:</p>
+              <div className="space-y-4">
+                <Link href="/settings" className="flex items-start gap-4 p-4 rounded-xl border border-[#E0DCD5] hover:border-[#0D9668] hover:bg-[#F5F3EF] transition-all group">
+                  <span className="flex-shrink-0 w-8 h-8 bg-[#0D9668] text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                  <div>
+                    <p className="font-medium text-[#1A1A2E] group-hover:text-[#0D9668]">Bankrekening toevoegen</p>
+                    <p className="text-sm text-[#636E72]">Ga naar Instellingen en voeg je zakelijke bankrekening toe (naam + IBAN)</p>
+                  </div>
+                </Link>
+                <Link href="/transactions" className="flex items-start gap-4 p-4 rounded-xl border border-[#E0DCD5] hover:border-[#0D9668] hover:bg-[#F5F3EF] transition-all group">
+                  <span className="flex-shrink-0 w-8 h-8 bg-[#EDEAE4] text-[#636E72] rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                  <div>
+                    <p className="font-medium text-[#1A1A2E] group-hover:text-[#0D9668]">Transacties invoeren</p>
+                    <p className="text-sm text-[#636E72]">Voeg je inkomsten en uitgaven toe. KlaarBoek categoriseert ze automatisch.</p>
+                  </div>
+                </Link>
+                <Link href="/invoices" className="flex items-start gap-4 p-4 rounded-xl border border-[#E0DCD5] hover:border-[#0D9668] hover:bg-[#F5F3EF] transition-all group">
+                  <span className="flex-shrink-0 w-8 h-8 bg-[#EDEAE4] text-[#636E72] rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                  <div>
+                    <p className="font-medium text-[#1A1A2E] group-hover:text-[#0D9668]">Facturen aanmaken</p>
+                    <p className="text-sm text-[#636E72]">Stuur professionele facturen naar je klanten.</p>
+                  </div>
+                </Link>
+                <div className="flex items-start gap-4 p-4 rounded-xl border border-[#E0DCD5] opacity-60">
+                  <span className="flex-shrink-0 w-8 h-8 bg-[#EDEAE4] text-[#636E72] rounded-full flex items-center justify-center text-sm font-bold">4</span>
+                  <div>
+                    <p className="font-medium text-[#1A1A2E]">BTW-aangifte bekijken</p>
+                    <p className="text-sm text-[#636E72]">Je BTW wordt automatisch berekend zodra je transacties hebt.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
