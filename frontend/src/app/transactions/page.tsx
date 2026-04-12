@@ -42,14 +42,29 @@ export default function TransactionsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editCategory, setEditCategory] = useState("");
   const [editBtw, setEditBtw] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [newTx, setNewTx] = useState({
+    date: new Date().toISOString().split("T")[0],
+    amount: "",
+    description: "",
+    counterparty: "",
+    category: "",
+    btw_rate: "21",
+    is_income: true,
+  });
+  const [bankConnId, setBankConnId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!api.isLoggedIn()) { router.push("/login"); return; }
 
     async function fetchData() {
       try {
-        const data = await api.getTransactions(200);
-        setTransactions(data);
+        const [txData, banks] = await Promise.all([
+          api.getTransactions(200),
+          api.getBankConnections(),
+        ]);
+        setTransactions(txData);
+        if (banks.length > 0) setBankConnId(banks[0].id);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Fout bij laden");
       } finally {
@@ -80,6 +95,34 @@ export default function TransactionsPage() {
     }
   }
 
+  async function addTransaction() {
+    if (!bankConnId) {
+      setError("Voeg eerst een bankrekening toe bij Instellingen");
+      return;
+    }
+    if (!newTx.amount) return;
+    try {
+      const amount = parseFloat(newTx.amount);
+      await api.createTransaction({
+        bank_connection_id: bankConnId,
+        date: newTx.date,
+        amount: newTx.is_income ? amount : -amount,
+        description: newTx.description || undefined,
+        counterparty: newTx.counterparty || undefined,
+        category: newTx.category || undefined,
+        btw_rate: newTx.btw_rate || undefined,
+        is_income: newTx.is_income,
+        is_business: true,
+      });
+      const data = await api.getTransactions(200);
+      setTransactions(data);
+      setShowAdd(false);
+      setNewTx({ date: new Date().toISOString().split("T")[0], amount: "", description: "", counterparty: "", category: "", btw_rate: "21", is_income: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Fout bij toevoegen");
+    }
+  }
+
   const filtered = transactions.filter((tx) => {
     const matchSearch =
       !search ||
@@ -105,6 +148,13 @@ export default function TransactionsPage() {
         <main className="flex-1 p-8">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold text-[#1A1A2E]">Transacties</h1>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowAdd(!showAdd)}
+                className="px-4 py-2 bg-[#0D9668] text-white rounded-lg text-sm font-medium hover:bg-[#0B7D56]"
+              >
+                + Transactie toevoegen
+              </button>
             <button
               onClick={async () => {
                 try {
@@ -122,7 +172,60 @@ export default function TransactionsPage() {
             >
               Auto-categoriseren
             </button>
+            </div>
           </div>
+
+          {showAdd && (
+            <div className="bg-white rounded-2xl border border-[#E0DCD5] p-6 mb-8">
+              <h2 className="text-lg font-bold text-[#1A1A2E] mb-4">Nieuwe transactie</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-[#1A1A2E] mb-1 block">Datum</label>
+                  <input type="date" value={newTx.date} onChange={(e) => setNewTx({ ...newTx, date: e.target.value })}
+                    className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm focus:outline-none focus:border-[#0D9668]" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#1A1A2E] mb-1 block">Bedrag</label>
+                  <input type="number" step="0.01" placeholder="0,00" value={newTx.amount} onChange={(e) => setNewTx({ ...newTx, amount: e.target.value })}
+                    className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm focus:outline-none focus:border-[#0D9668]" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#1A1A2E] mb-1 block">Type</label>
+                  <select value={newTx.is_income ? "income" : "expense"} onChange={(e) => setNewTx({ ...newTx, is_income: e.target.value === "income" })}
+                    className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm focus:outline-none focus:border-[#0D9668]">
+                    <option value="income">Inkomsten</option>
+                    <option value="expense">Uitgaven</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#1A1A2E] mb-1 block">Omschrijving</label>
+                  <input type="text" placeholder="Omschrijving" value={newTx.description} onChange={(e) => setNewTx({ ...newTx, description: e.target.value })}
+                    className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm focus:outline-none focus:border-[#0D9668]" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#1A1A2E] mb-1 block">Tegenpartij</label>
+                  <input type="text" placeholder="Naam klant/leverancier" value={newTx.counterparty} onChange={(e) => setNewTx({ ...newTx, counterparty: e.target.value })}
+                    className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm focus:outline-none focus:border-[#0D9668]" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#1A1A2E] mb-1 block">Categorie</label>
+                  <select value={newTx.category} onChange={(e) => setNewTx({ ...newTx, category: e.target.value })}
+                    className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm focus:outline-none focus:border-[#0D9668]">
+                    <option value="">Geen</option>
+                    {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="flex gap-3 mt-4">
+                <button onClick={addTransaction} className="px-4 py-2 bg-[#0D9668] text-white rounded-lg text-sm font-medium hover:bg-[#0B7D56]">
+                  Opslaan
+                </button>
+                <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-[#636E72] text-sm hover:text-[#1A1A2E]">
+                  Annuleren
+                </button>
+              </div>
+            </div>
+          )}
 
           {loading && (
             <div className="flex items-center justify-center h-64">

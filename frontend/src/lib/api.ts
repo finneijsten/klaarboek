@@ -1,11 +1,41 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+const DEMO_TRANSACTIONS = [
+  { id: 1, bank_connection_id: 1, date: "2026-04-10", amount: 2400.00, description: "Website redesign - Bakkerij van Dam", counterparty: "Bakkerij van Dam B.V.", category: "Omzet", btw_rate: "21%", is_business: true, is_income: true, classified_by: "ai", created_at: "2026-04-10" },
+  { id: 2, bank_connection_id: 1, date: "2026-04-08", amount: -49.99, description: "Adobe Creative Cloud", counterparty: "Adobe Systems", category: "Software", btw_rate: "21%", is_business: true, is_income: false, classified_by: "ai", created_at: "2026-04-08" },
+  { id: 3, bank_connection_id: 1, date: "2026-04-05", amount: 1850.00, description: "Logo & huisstijl ontwerp", counterparty: "Fietsenwinkel De Groot", category: "Omzet", btw_rate: "21%", is_business: true, is_income: true, classified_by: "ai", created_at: "2026-04-05" },
+  { id: 4, bank_connection_id: 1, date: "2026-04-03", amount: -125.00, description: "Coworking space april", counterparty: "Spaces Eindhoven", category: "Huisvesting", btw_rate: "21%", is_business: true, is_income: false, classified_by: "ai", created_at: "2026-04-03" },
+  { id: 5, bank_connection_id: 1, date: "2026-04-01", amount: -29.00, description: "Boekhoudpakket KlaarBoek", counterparty: "KlaarBoek B.V.", category: "Software", btw_rate: "21%", is_business: true, is_income: false, classified_by: "manual", created_at: "2026-04-01" },
+  { id: 6, bank_connection_id: 1, date: "2026-03-28", amount: 3200.00, description: "Webshop ontwikkeling fase 2", counterparty: "Bloemenhandel Jansen", category: "Omzet", btw_rate: "21%", is_business: true, is_income: true, classified_by: "ai", created_at: "2026-03-28" },
+  { id: 7, bank_connection_id: 1, date: "2026-03-25", amount: -89.00, description: "Zakelijke telefoon", counterparty: "KPN Zakelijk", category: "Telecom", btw_rate: "21%", is_business: true, is_income: false, classified_by: "ai", created_at: "2026-03-25" },
+  { id: 8, bank_connection_id: 1, date: "2026-03-20", amount: 950.00, description: "SEO optimalisatie", counterparty: "Café De Hoek", category: "Omzet", btw_rate: "21%", is_business: true, is_income: true, classified_by: "ai", created_at: "2026-03-20" },
+  { id: 9, bank_connection_id: 1, date: "2026-03-15", amount: -312.50, description: "Zakelijke verzekering Q1", counterparty: "Allianz Nederland", category: "Verzekeringen", btw_rate: "0%", is_business: true, is_income: false, classified_by: "ai", created_at: "2026-03-15" },
+  { id: 10, bank_connection_id: 1, date: "2026-03-10", amount: 1500.00, description: "Social media campagne", counterparty: "Restaurant Luigi", category: "Omzet", btw_rate: "21%", is_business: true, is_income: true, classified_by: "ai", created_at: "2026-03-10" },
+  { id: 11, bank_connection_id: 1, date: "2026-03-05", amount: -45.00, description: "Domeinregistratie + hosting", counterparty: "TransIP", category: "Software", btw_rate: "21%", is_business: true, is_income: false, classified_by: "ai", created_at: "2026-03-05" },
+  { id: 12, bank_connection_id: 1, date: "2026-03-01", amount: 4100.00, description: "App prototype & wireframes", counterparty: "Makelaardij Smit", category: "Omzet", btw_rate: "21%", is_business: true, is_income: true, classified_by: "ai", created_at: "2026-03-01" },
+];
+
+const DEMO_INVOICES = [
+  { id: 1, user_id: 1, invoice_number: "2026-001", client_name: "Bakkerij van Dam B.V.", amount_excl_btw: 1983.47, btw_rate: 21, btw_amount: 416.53, amount_incl_btw: 2400.00, due_date: "2026-04-24", is_paid: true, matched_transaction_id: 1, created_at: "2026-04-10" },
+  { id: 2, user_id: 1, invoice_number: "2026-002", client_name: "Fietsenwinkel De Groot", amount_excl_btw: 1528.93, btw_rate: 21, btw_amount: 321.07, amount_incl_btw: 1850.00, due_date: "2026-04-19", is_paid: true, matched_transaction_id: 3, created_at: "2026-04-05" },
+  { id: 3, user_id: 1, invoice_number: "2026-003", client_name: "Bloemenhandel Jansen", amount_excl_btw: 2644.63, btw_rate: 21, btw_amount: 555.37, amount_incl_btw: 3200.00, due_date: "2026-04-11", is_paid: true, matched_transaction_id: 6, created_at: "2026-03-28" },
+  { id: 4, user_id: 1, invoice_number: "2026-004", client_name: "Makelaardij Smit", amount_excl_btw: 3388.43, btw_rate: 21, btw_amount: 711.57, amount_incl_btw: 4100.00, due_date: "2026-03-29", is_paid: true, matched_transaction_id: 12, created_at: "2026-03-01" },
+  { id: 5, user_id: 1, invoice_number: "2026-005", client_name: "Tandartspraktijk Visser", amount_excl_btw: 2479.34, btw_rate: 21, btw_amount: 520.66, amount_incl_btw: 3000.00, due_date: "2026-04-30", is_paid: false, matched_transaction_id: null, created_at: "2026-04-11" },
+];
+
+const DEMO_BTW_DECLARATIONS = [
+  { id: 1, user_id: 1, year: 2025, quarter: 4, total_income: 18200, total_expenses: 3150, btw_collected: 3822, btw_paid: 549.78, btw_owed: 3272.22, status: "submitted", submitted_at: "2026-01-28", created_at: "2026-01-25" },
+  { id: 2, user_id: 1, year: 2026, quarter: 1, total_income: 14000, total_expenses: 2850, btw_collected: 2940, btw_paid: 498.75, btw_owed: 2441.25, status: "concept", submitted_at: null, created_at: "2026-04-01" },
+];
+
 class ApiClient {
   private token: string | null = null;
+  private demoMode = false;
 
   constructor() {
     if (typeof window !== "undefined") {
       this.token = localStorage.getItem("klaarboek_token");
+      this.demoMode = localStorage.getItem("klaarboek_demo") === "true";
     }
   }
 
@@ -18,9 +48,24 @@ class ApiClient {
 
   clearToken() {
     this.token = null;
+    this.demoMode = false;
     if (typeof window !== "undefined") {
       localStorage.removeItem("klaarboek_token");
+      localStorage.removeItem("klaarboek_demo");
     }
+  }
+
+  enableDemo() {
+    this.demoMode = true;
+    this.token = "demo";
+    if (typeof window !== "undefined") {
+      localStorage.setItem("klaarboek_token", "demo");
+      localStorage.setItem("klaarboek_demo", "true");
+    }
+  }
+
+  isDemo() {
+    return this.demoMode;
   }
 
   private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -63,6 +108,11 @@ class ApiClient {
   }
 
   async login(email: string, password: string) {
+    if (email === "demo@klaarboek.nl" && password === "demo") {
+      this.enableDemo();
+      return { access_token: "demo" };
+    }
+
     const formData = new URLSearchParams();
     formData.append("username", email);
     formData.append("password", password);
@@ -81,150 +131,73 @@ class ApiClient {
   }
 
   async getProfile() {
-    return this.request<{
-      id: number;
-      email: string;
-      kvk_number: string | null;
-      btw_number: string | null;
-      company_name: string | null;
-      created_at: string;
-    }>("/auth/me");
+    if (this.demoMode) return { id: 1, email: "demo@klaarboek.nl", kvk_number: "12345678", btw_number: "NL001234567B01", company_name: "Demo Design Studio", created_at: "2025-09-01" };
+    return this.request<{ id: number; email: string; kvk_number: string | null; btw_number: string | null; company_name: string | null; created_at: string }>("/auth/me");
   }
 
   async updateProfile(data: { company_name?: string; kvk_number?: string; btw_number?: string }) {
-    return this.request<{
-      id: number;
-      email: string;
-      kvk_number: string | null;
-      btw_number: string | null;
-      company_name: string | null;
-      created_at: string;
-    }>("/auth/me", {
+    if (this.demoMode) return { id: 1, email: "demo@klaarboek.nl", ...data, kvk_number: data.kvk_number ?? "12345678", btw_number: data.btw_number ?? "NL001234567B01", company_name: data.company_name ?? "Demo Design Studio", created_at: "2025-09-01" };
+    return this.request<{ id: number; email: string; kvk_number: string | null; btw_number: string | null; company_name: string | null; created_at: string }>("/auth/me", {
       method: "PATCH",
       body: JSON.stringify(data),
     });
   }
 
   // Transactions update
-  async updateTransaction(id: number, data: {
-    category?: string;
-    btw_rate?: string;
-    is_business?: boolean;
-    is_income?: boolean;
-    description?: string;
-    counterparty?: string;
-  }) {
-    return this.request(`/transactions/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    });
+  async updateTransaction(id: number, data: { category?: string; btw_rate?: string; is_business?: boolean; is_income?: boolean; description?: string; counterparty?: string }) {
+    if (this.demoMode) return { id, ...data };
+    return this.request(`/transactions/${id}`, { method: "PATCH", body: JSON.stringify(data) });
   }
 
   async classifyTransactions() {
+    if (this.demoMode) return { classified: 12 };
     return this.request<{ classified: number }>("/transactions/classify", { method: "POST" });
   }
 
   // Dashboard
   async getDashboard() {
-    return this.request<{
-      total_income: number;
-      total_expenses: number;
-      btw_owed: number;
-      profit: number;
-      transaction_count: number;
-    }>("/transactions/dashboard");
+    if (this.demoMode) return { total_income: 14000, total_expenses: 650.49, btw_owed: 2441.25, profit: 13349.51, transaction_count: 12 };
+    return this.request<{ total_income: number; total_expenses: number; btw_owed: number; profit: number; transaction_count: number }>("/transactions/dashboard");
   }
 
   // Transactions
-  async getTransactions(limit = 50, offset = 0) {
-    return this.request<Array<{
-      id: number;
-      bank_connection_id: number;
-      date: string;
-      amount: number;
-      description: string | null;
-      counterparty: string | null;
-      category: string | null;
-      btw_rate: string | null;
-      is_business: boolean;
-      is_income: boolean;
-      classified_by: string;
-      created_at: string;
-    }>>(`/transactions/?limit=${limit}&offset=${offset}`);
+  async getTransactions(limit = 50, _offset = 0) {
+    if (this.demoMode) return DEMO_TRANSACTIONS.slice(0, limit);
+    return this.request<typeof DEMO_TRANSACTIONS>(`/transactions/?limit=${limit}&offset=${_offset}`);
   }
 
-  async createTransaction(data: {
-    bank_connection_id: number;
-    date: string;
-    amount: number;
-    description?: string;
-    counterparty?: string;
-    category?: string;
-    btw_rate?: string;
-    is_business?: boolean;
-    is_income?: boolean;
-  }) {
-    return this.request("/transactions/", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+  async createTransaction(data: { bank_connection_id: number; date: string; amount: number; description?: string; counterparty?: string; category?: string; btw_rate?: string; is_business?: boolean; is_income?: boolean }) {
+    if (this.demoMode) return { id: 99, ...data, classified_by: "manual", created_at: new Date().toISOString() };
+    return this.request("/transactions/", { method: "POST", body: JSON.stringify(data) });
   }
 
   // Invoices
-  async getInvoices(limit = 50, offset = 0) {
-    return this.request<Array<{
-      id: number;
-      user_id: number;
-      invoice_number: string | null;
-      client_name: string;
-      amount_excl_btw: number;
-      btw_rate: number;
-      btw_amount: number;
-      amount_incl_btw: number;
-      due_date: string | null;
-      is_paid: boolean;
-      matched_transaction_id: number | null;
-      created_at: string;
-    }>>(`/invoices/?limit=${limit}&offset=${offset}`);
+  async getInvoices(limit = 50, _offset = 0) {
+    if (this.demoMode) return DEMO_INVOICES.slice(0, limit);
+    return this.request<typeof DEMO_INVOICES>(`/invoices/?limit=${limit}&offset=${_offset}`);
   }
 
-  async createInvoice(data: {
-    client_name: string;
-    invoice_number?: string;
-    amount_excl_btw: number;
-    btw_rate?: number;
-    due_date?: string;
-  }) {
-    return this.request("/invoices/", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+  async createInvoice(data: { client_name: string; invoice_number?: string; amount_excl_btw: number; btw_rate?: number; due_date?: string }) {
+    if (this.demoMode) { const rate = data.btw_rate ?? 21; const btwAmt = data.amount_excl_btw * rate / 100; return { id: 99, user_id: 1, invoice_number: data.invoice_number ?? "2026-006", client_name: data.client_name, amount_excl_btw: data.amount_excl_btw, btw_rate: rate, btw_amount: btwAmt, amount_incl_btw: data.amount_excl_btw + btwAmt, due_date: data.due_date ?? null, is_paid: false, matched_transaction_id: null, created_at: new Date().toISOString().split("T")[0] }; }
+    return this.request("/invoices/", { method: "POST", body: JSON.stringify(data) });
   }
 
-  async updateInvoice(id: number, data: {
-    client_name?: string;
-    amount_excl_btw?: number;
-    btw_rate?: number;
-    due_date?: string;
-    is_paid?: boolean;
-  }) {
-    return this.request(`/invoices/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    });
+  async updateInvoice(id: number, data: { client_name?: string; amount_excl_btw?: number; btw_rate?: number; due_date?: string; is_paid?: boolean }) {
+    if (this.demoMode) return { id, ...data };
+    return this.request(`/invoices/${id}`, { method: "PATCH", body: JSON.stringify(data) });
   }
 
   async deleteInvoice(id: number) {
+    if (this.demoMode) return { ok: true };
     return this.request(`/invoices/${id}`, { method: "DELETE" });
   }
 
   async downloadInvoicePdf(id: number) {
+    if (this.demoMode) { alert("PDF download is niet beschikbaar in demo modus"); return; }
     const headers: Record<string, string> = {};
     if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
-
     const res = await fetch(`${API_BASE}/invoices/${id}/pdf`, { headers });
     if (!res.ok) throw new Error("PDF download mislukt");
-
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -236,62 +209,33 @@ class ApiClient {
 
   // BTW
   async getBTWDeclarations() {
-    return this.request<Array<{
-      id: number;
-      user_id: number;
-      year: number;
-      quarter: number;
-      total_income: number;
-      total_expenses: number;
-      btw_collected: number;
-      btw_paid: number;
-      btw_owed: number;
-      status: string;
-      submitted_at: string | null;
-      created_at: string;
-    }>>("/btw/declarations");
+    if (this.demoMode) return DEMO_BTW_DECLARATIONS;
+    return this.request<typeof DEMO_BTW_DECLARATIONS>("/btw/declarations");
   }
 
   async calculateBTW(year: number, quarter: number) {
-    return this.request<{
-      year: number;
-      quarter: number;
-      total_income: number;
-      total_expenses: number;
-      btw_collected: number;
-      btw_paid: number;
-      btw_owed: number;
-      transaction_count: number;
-    }>(`/btw/calculate?year=${year}&quarter=${quarter}`);
+    if (this.demoMode) return { year, quarter, total_income: 14000, total_expenses: 2850, btw_collected: 2940, btw_paid: 498.75, btw_owed: 2441.25, transaction_count: 12 };
+    return this.request<{ year: number; quarter: number; total_income: number; total_expenses: number; btw_collected: number; btw_paid: number; btw_owed: number; transaction_count: number }>(`/btw/calculate?year=${year}&quarter=${quarter}`);
   }
 
   async saveBTWDeclaration(year: number, quarter: number) {
-    return this.request("/btw/declarations", {
-      method: "POST",
-      body: JSON.stringify({ year, quarter }),
-    });
+    if (this.demoMode) return { id: 99, user_id: 1, year, quarter, total_income: 14000, total_expenses: 2850, btw_collected: 2940, btw_paid: 498.75, btw_owed: 2441.25, status: "concept", submitted_at: null, created_at: new Date().toISOString().split("T")[0] };
+    return this.request("/btw/declarations", { method: "POST", body: JSON.stringify({ year, quarter }) });
   }
 
   // Bank connections
   async getBankConnections() {
-    return this.request<Array<{
-      id: number;
-      user_id: number;
-      bank_name: string;
-      iban: string;
-      is_active: boolean;
-      connected_at: string;
-    }>>("/banks/");
+    if (this.demoMode) return [{ id: 1, user_id: 1, bank_name: "ING", iban: "NL91INGB0001234567", is_active: true, connected_at: "2025-09-15" }];
+    return this.request<Array<{ id: number; user_id: number; bank_name: string; iban: string; is_active: boolean; connected_at: string }>>("/banks/");
   }
 
   async createBankConnection(data: { bank_name: string; iban: string }) {
-    return this.request("/banks/", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    if (this.demoMode) return { id: 99, user_id: 1, ...data, is_active: true, connected_at: new Date().toISOString().split("T")[0] };
+    return this.request("/banks/", { method: "POST", body: JSON.stringify(data) });
   }
 
   async deleteBankConnection(id: number) {
+    if (this.demoMode) return { ok: true };
     return this.request(`/banks/${id}`, { method: "DELETE" });
   }
 

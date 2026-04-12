@@ -1,5 +1,4 @@
 import Link from "next/link";
-import WaitlistForm from "@/components/WaitlistForm";
 
 export default function Home() {
   return (
@@ -26,8 +25,15 @@ export default function Home() {
           Koppel je bank, en KlaarBoek doet de rest. Automatische transactieclassificatie,
           BTW-aangifte en financieel overzicht.
         </p>
-        <WaitlistForm />
-        <p className="text-sm text-[#B2BEC3] mt-3">Gratis. Geen spam. We laten je weten wanneer we live gaan.</p>
+        <div className="flex gap-4 flex-wrap justify-center">
+          <Link href="/register" className="px-8 py-3 bg-[#0D9668] text-white font-bold rounded-xl hover:bg-[#0A7B55] transition-all text-lg">
+            Gratis account aanmaken
+          </Link>
+          <Link href="/login" className="px-8 py-3 border-2 border-[#0D9668] text-[#0D9668] font-bold rounded-xl hover:bg-[#0D9668] hover:text-white transition-all text-lg">
+            Inloggen
+          </Link>
+        </div>
+        <p className="text-sm text-[#B2BEC3] mt-3">Gratis tijdens de beta. Geen creditcard nodig.</p>
       </section>
 
       {/* Stats */}

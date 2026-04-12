@@ -73,6 +73,13 @@ export default function Login() {
             Registreer
           </a>
         </p>
+
+        <div className="mt-4 p-3 bg-[#F5F3EF] rounded-lg border border-[#E0DCD5]">
+          <p className="text-xs text-[#636E72] text-center">
+            <span className="font-medium text-[#1A1A2E]">Demo account:</span>{" "}
+            demo@klaarboek.nl / demo
+          </p>
+        </div>
       </div>
     </div>
   );
