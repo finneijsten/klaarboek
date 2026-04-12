@@ -126,6 +126,8 @@ class ApiClient {
     if (!res.ok) throw new Error("Login failed");
 
     const data = await res.json();
+    this.demoMode = false;
+    if (typeof window !== "undefined") localStorage.removeItem("klaarboek_demo");
     this.setToken(data.access_token);
     return data;
   }

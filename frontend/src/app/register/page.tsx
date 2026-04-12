@@ -44,7 +44,7 @@ export default function Register() {
               value={form.email}
               onChange={(e) => update("email", e.target.value)}
               required
-              className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm focus:outline-none focus:border-[#0D9668]"
+              className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm text-[#1A1A2E] focus:outline-none focus:border-[#0D9668]"
               placeholder="jouw@email.nl"
             />
           </div>
@@ -56,7 +56,7 @@ export default function Register() {
               onChange={(e) => update("password", e.target.value)}
               required
               minLength={8}
-              className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm focus:outline-none focus:border-[#0D9668]"
+              className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm text-[#1A1A2E] focus:outline-none focus:border-[#0D9668]"
               placeholder="Minimaal 8 tekens"
             />
           </div>
@@ -66,7 +66,7 @@ export default function Register() {
               type="text"
               value={form.companyName}
               onChange={(e) => update("companyName", e.target.value)}
-              className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm focus:outline-none focus:border-[#0D9668]"
+              className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm text-[#1A1A2E] focus:outline-none focus:border-[#0D9668]"
               placeholder="Jouw bedrijf B.V."
             />
           </div>
@@ -76,7 +76,7 @@ export default function Register() {
               type="text"
               value={form.kvkNumber}
               onChange={(e) => update("kvkNumber", e.target.value)}
-              className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm focus:outline-none focus:border-[#0D9668]"
+              className="w-full px-4 py-2 border border-[#E0DCD5] rounded-lg text-sm text-[#1A1A2E] focus:outline-none focus:border-[#0D9668]"
               placeholder="12345678"
             />
           </div>
