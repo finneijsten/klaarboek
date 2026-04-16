@@ -22,6 +22,79 @@ type Profile = {
   created_at: string;
 };
 
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("nl-NL", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function BankRow({
+  bank,
+  onDelete,
+  onError,
+}: {
+  bank: BankConnection;
+  onDelete: () => void;
+  onError: (message: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setResult(null);
+    try {
+      const r = await api.importBankCSV(bank.id, file);
+      setResult(`${r.imported} transactie(s) geïmporteerd`);
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Import mislukt");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <div className="border border-[#E0DCD5] rounded-xl p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-[#1A1A2E]">{bank.bank_name}</p>
+          <p className="text-sm text-[#636E72] font-mono">{bank.iban}</p>
+          <p className="text-xs text-[#636E72] mt-1">Gekoppeld op {formatDate(bank.connected_at)}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span
+            className={`text-xs px-2 py-1 rounded-full ${
+              bank.is_active ? "bg-green-100 text-[#0D9668]" : "bg-gray-100 text-[#636E72]"
+            }`}
+          >
+            {bank.is_active ? "Actief" : "Inactief"}
+          </span>
+          <button onClick={onDelete} className="text-sm text-red-500 hover:text-red-700">
+            Verwijderen
+          </button>
+        </div>
+      </div>
+      <div className="mt-3 flex items-center gap-3 text-xs">
+        <label className="inline-flex items-center gap-2 cursor-pointer text-[#0D9668] hover:text-[#0B7D56] font-medium">
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleUpload}
+            disabled={uploading}
+            className="hidden"
+          />
+          {uploading ? "Importeren..." : "+ CSV importeren"}
+        </label>
+        <span className="text-[#636E72]">
+          Ondersteunt ING, Rabobank, ABN AMRO, Bunq, Knab, Revolut
+        </span>
+        {result && <span className="text-[#0D9668] font-medium">{result}</span>}
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const router = useRouter();
   const [banks, setBanks] = useState<BankConnection[]>([]);
@@ -117,10 +190,6 @@ export default function SettingsPage() {
     }
   }
 
-  function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString("nl-NL", { day: "2-digit", month: "short", year: "numeric" });
-  }
-
   return (
     <div className="min-h-screen bg-[#F5F3EF]">
       <div className="flex">
@@ -196,26 +265,12 @@ export default function SettingsPage() {
             ) : (
               <div className="space-y-3">
                 {banks.map((bank) => (
-                  <div key={bank.id} className="flex items-center justify-between border border-[#E0DCD5] rounded-xl p-4">
-                    <div>
-                      <p className="text-sm font-medium text-[#1A1A2E]">{bank.bank_name}</p>
-                      <p className="text-sm text-[#636E72] font-mono">{bank.iban}</p>
-                      <p className="text-xs text-[#636E72] mt-1">Gekoppeld op {formatDate(bank.connected_at)}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        bank.is_active ? "bg-green-100 text-[#0D9668]" : "bg-gray-100 text-[#636E72]"
-                      }`}>
-                        {bank.is_active ? "Actief" : "Inactief"}
-                      </span>
-                      <button
-                        onClick={() => handleDeleteBank(bank.id)}
-                        className="text-sm text-red-500 hover:text-red-700"
-                      >
-                        Verwijderen
-                      </button>
-                    </div>
-                  </div>
+                  <BankRow
+                    key={bank.id}
+                    bank={bank}
+                    onDelete={() => handleDeleteBank(bank.id)}
+                    onError={(m) => setError(m)}
+                  />
                 ))}
               </div>
             )}
@@ -280,6 +335,51 @@ export default function SettingsPage() {
                 </div>
               </form>
             )}
+          </div>
+
+          {/* Data export */}
+          <div className="bg-white rounded-2xl border border-[#E0DCD5] p-6 mt-8">
+            <h2 className="text-lg font-bold text-[#1A1A2E] mb-2">Mijn data</h2>
+            <p className="text-sm text-[#636E72] mb-4">
+              Download al je gegevens als ZIP: profiel, bankrekeningen, transacties,
+              facturen en BTW-aangiftes.
+            </p>
+            <button
+              onClick={async () => {
+                try {
+                  await api.exportData();
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Export mislukt");
+                }
+              }}
+              className="px-6 py-2 bg-[#1A1A2E] text-white rounded-lg text-sm font-medium hover:bg-[#2A2A3E]"
+            >
+              Data exporteren (ZIP)
+            </button>
+          </div>
+
+          {/* Danger zone */}
+          <div className="bg-white rounded-2xl border border-red-200 p-6 mt-8">
+            <h2 className="text-lg font-bold text-red-600 mb-2">Gevarenzone</h2>
+            <p className="text-sm text-[#636E72] mb-4">
+              Account verwijderen wist al je data definitief: transacties,
+              facturen, BTW-aangiftes en bankrekeningen. Exporteer je data
+              eerst als je die wilt bewaren.
+            </p>
+            <button
+              onClick={async () => {
+                if (!confirm("Weet je het zeker? Je account en alle data worden definitief verwijderd.")) return;
+                try {
+                  await api.deleteAccount();
+                  router.push("/");
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Verwijderen mislukt");
+                }
+              }}
+              className="px-6 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700"
+            >
+              Account definitief verwijderen
+            </button>
           </div>
         </main>
       </div>

@@ -3,10 +3,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.database import SupabaseClient, get_db
 from app.schemas.btw import BTWDeclarationResponse, BTWCalculation
 from app.auth import get_current_user
+from app.btw import summarise_transactions
 
 router = APIRouter(prefix="/btw", tags=["btw"])
-
-BTW_RATES = {"21": 0.21, "9": 0.09, "0": 0.0}
 
 
 @router.get("/declarations", response_model=list[BTWDeclarationResponse])
@@ -22,17 +21,7 @@ async def list_declarations(
     return declarations
 
 
-@router.get("/calculate", response_model=BTWCalculation)
-async def calculate_btw(
-    year: int,
-    quarter: int,
-    user: dict = Depends(get_current_user),
-    db: SupabaseClient = Depends(get_db),
-):
-    if quarter not in (1, 2, 3, 4):
-        raise HTTPException(status_code=400, detail="Kwartaal moet 1-4 zijn")
-
-    # Quarter date ranges
+def _quarter_range(year: int, quarter: int) -> tuple[str, str]:
     month_start = (quarter - 1) * 3 + 1
     month_end = quarter * 3
     date_start = f"{year}-{month_start:02d}-01"
@@ -40,9 +29,16 @@ async def calculate_btw(
         date_end = f"{year + 1}-01-01"
     else:
         date_end = f"{year}-{month_end + 1:02d}-01"
+    return date_start, date_end
 
-    # Get user's bank connections
-    connections = await db.select("bank_connections", columns="id", filters={"user_id": user["id"]})
+
+async def _calculate(db: SupabaseClient, user_id: int, year: int, quarter: int) -> BTWCalculation:
+    if quarter not in (1, 2, 3, 4):
+        raise HTTPException(status_code=400, detail="Kwartaal moet 1-4 zijn")
+
+    date_start, date_end = _quarter_range(year, quarter)
+    connections = await db.select("bank_connections", columns="id",
+                                  filters={"user_id": user_id})
     if not connections:
         return BTWCalculation(
             year=year, quarter=quarter,
@@ -51,45 +47,37 @@ async def calculate_btw(
             transaction_count=0,
         )
 
-    # Get transactions for the quarter
-    all_transactions = []
-    for conn in connections:
-        txs = await db.select(
-            "transactions",
-            filters={
-                "bank_connection_id": conn["id"],
-                "date": {"gte": date_start, "lt": date_end},
-                "is_business": True,
-            },
-        )
-        all_transactions.extend(txs)
+    conn_ids = [c["id"] for c in connections]
+    txs = await db.select(
+        "transactions",
+        filters={
+            "bank_connection_id": {"in": f"({','.join(str(i) for i in conn_ids)})"},
+            "date": {"gte": date_start, "lt": date_end},
+            "is_business": True,
+        },
+    )
 
-    total_income = 0.0
-    total_expenses = 0.0
-    btw_collected = 0.0
-    btw_paid = 0.0
-
-    for tx in all_transactions:
-        rate = BTW_RATES.get(tx.get("btw_rate", "21"), 0.21)
-        amount = abs(tx["amount"])
-
-        if tx.get("is_income"):
-            total_income += amount
-            btw_collected += round(amount * rate / (1 + rate), 2)
-        else:
-            total_expenses += amount
-            btw_paid += round(amount * rate / (1 + rate), 2)
-
+    summary = summarise_transactions(txs)
     return BTWCalculation(
         year=year,
         quarter=quarter,
-        total_income=round(total_income, 2),
-        total_expenses=round(total_expenses, 2),
-        btw_collected=round(btw_collected, 2),
-        btw_paid=round(btw_paid, 2),
-        btw_owed=round(btw_collected - btw_paid, 2),
-        transaction_count=len(all_transactions),
+        total_income=summary["total_income"],
+        total_expenses=summary["total_expenses"],
+        btw_collected=summary["btw_collected"],
+        btw_paid=summary["btw_paid"],
+        btw_owed=summary["btw_owed"],
+        transaction_count=len(txs),
     )
+
+
+@router.get("/calculate", response_model=BTWCalculation)
+async def calculate_btw(
+    year: int,
+    quarter: int,
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    return await _calculate(db, user["id"], year, quarter)
 
 
 @router.post("/declarations", response_model=BTWDeclarationResponse, status_code=201)
@@ -99,16 +87,13 @@ async def save_declaration(
     user: dict = Depends(get_current_user),
     db: SupabaseClient = Depends(get_db),
 ):
-    # Check if declaration already exists
     existing = await db.select("btw_declarations", filters={
         "user_id": user["id"], "year": year, "quarter": quarter,
     })
     if existing:
         raise HTTPException(status_code=400, detail="Aangifte voor dit kwartaal bestaat al")
 
-    # Calculate first
-    calc = await calculate_btw(year, quarter, user, db)
-
+    calc = await _calculate(db, user["id"], year, quarter)
     declaration = await db.insert("btw_declarations", {
         "user_id": user["id"],
         "year": year,

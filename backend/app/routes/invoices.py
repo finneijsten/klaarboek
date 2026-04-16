@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 
@@ -7,6 +9,29 @@ from app.auth import get_current_user
 from app.pdf import generate_invoice_pdf
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
+
+
+_NUMBER_SUFFIX_RE = re.compile(r"(\d+)\s*$")
+
+
+async def _next_invoice_number(db: SupabaseClient, user_id: int) -> str:
+    """Generate the next invoice number for a user.
+
+    Uses MAX(trailing integer) + 1 rather than count(*) so that deletions
+    don't cause unique-constraint collisions.
+    """
+    existing = await db.select("invoices", columns="invoice_number",
+                               filters={"user_id": user_id})
+    highest = 0
+    for inv in existing:
+        num = inv.get("invoice_number") or ""
+        m = _NUMBER_SUFFIX_RE.search(num)
+        if m:
+            try:
+                highest = max(highest, int(m.group(1)))
+            except ValueError:
+                pass
+    return f"KB-{user_id}-{highest + 1:04d}"
 
 
 @router.get("/", response_model=list[InvoiceResponse])
@@ -35,16 +60,14 @@ async def create_invoice(
     btw_amount = round(data.amount_excl_btw * (data.btw_rate / 100), 2)
     amount_incl_btw = round(data.amount_excl_btw + btw_amount, 2)
 
-    # Generate invoice number if not provided
-    invoice_number = data.invoice_number
-    if not invoice_number:
-        existing = await db.select("invoices", columns="id", filters={"user_id": user["id"]})
-        invoice_number = f"KB-{user['id']}-{len(existing) + 1:04d}"
+    invoice_number = data.invoice_number or await _next_invoice_number(db, user["id"])
 
     invoice = await db.insert("invoices", {
         "user_id": user["id"],
         "invoice_number": invoice_number,
         "client_name": data.client_name,
+        "client_email": data.client_email,
+        "description": data.description,
         "amount_excl_btw": data.amount_excl_btw,
         "btw_rate": data.btw_rate,
         "btw_amount": btw_amount,

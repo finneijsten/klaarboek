@@ -25,6 +25,13 @@ type Transaction = {
   is_income: boolean;
 };
 
+type CategoryBreakdown = {
+  category: string;
+  total_income: number;
+  total_expenses: number;
+  transaction_count: number;
+};
+
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(amount);
 }
@@ -34,12 +41,22 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("nl-NL", { day: "2-digit", month: "short" });
 }
 
+type Period = "month" | "quarter" | "ytd" | "all";
+const PERIOD_LABELS: Record<Period, string> = {
+  month: "Deze maand",
+  quarter: "Dit kwartaal",
+  ytd: "Dit jaar",
+  all: "Alles",
+};
+
 export default function Dashboard() {
   const router = useRouter();
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<CategoryBreakdown[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [period, setPeriod] = useState<Period>("quarter");
 
   useEffect(() => {
     if (!api.isLoggedIn()) {
@@ -49,12 +66,14 @@ export default function Dashboard() {
 
     async function fetchData() {
       try {
-        const [dashData, txData] = await Promise.all([
-          api.getDashboard(),
+        const [dashData, txData, catData] = await Promise.all([
+          api.getDashboard(period),
           api.getTransactions(10),
+          api.getCategoryBreakdown(period),
         ]);
         setDashboard(dashData);
         setTransactions(txData);
+        setCategories(catData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Fout bij laden");
       } finally {
@@ -63,7 +82,7 @@ export default function Dashboard() {
     }
 
     fetchData();
-  }, [router]);
+  }, [router, period]);
 
   return (
     <div className="min-h-screen bg-[#F5F3EF]">
@@ -72,7 +91,24 @@ export default function Dashboard() {
 
         {/* Main content */}
         <main className="flex-1 p-8">
-          <h1 className="text-2xl font-bold text-[#1A1A2E] mb-8">Dashboard</h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-2xl font-bold text-[#1A1A2E]">Dashboard</h1>
+            <div className="inline-flex rounded-lg border border-[#E0DCD5] bg-white overflow-hidden text-sm">
+              {(Object.keys(PERIOD_LABELS) as Period[]).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={`px-4 py-2 ${
+                    period === p
+                      ? "bg-[#0D9668] text-white"
+                      : "text-[#636E72] hover:bg-[#EDEAE4]"
+                  }`}
+                >
+                  {PERIOD_LABELS[p]}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {loading && (
             <div className="flex items-center justify-center h-64">
@@ -139,6 +175,38 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
+
+              {/* Category breakdown */}
+              {categories.length > 0 && (
+                <div className="bg-white rounded-2xl border border-[#E0DCD5] p-6 mb-8">
+                  <h2 className="text-lg font-bold text-[#1A1A2E] mb-4">Uitgaven per categorie</h2>
+                  {(() => {
+                    const expenseRows = categories.filter((c) => c.total_expenses > 0);
+                    if (expenseRows.length === 0) {
+                      return <p className="text-sm text-[#636E72]">Nog geen uitgaven in deze periode.</p>;
+                    }
+                    const max = Math.max(...expenseRows.map((c) => c.total_expenses));
+                    return (
+                      <div className="space-y-3">
+                        {expenseRows.slice(0, 8).map((c) => (
+                          <div key={c.category}>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span className="text-[#1A1A2E] font-medium">{c.category}</span>
+                              <span className="text-[#636E72]">{formatCurrency(c.total_expenses)}</span>
+                            </div>
+                            <div className="h-2 bg-[#EDEAE4] rounded-full overflow-hidden">
+                              <div
+                                className="h-2 bg-[#0D9668]"
+                                style={{ width: `${Math.max(4, (c.total_expenses / max) * 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
 
               {/* Recent transactions */}
               <div className="bg-white rounded-2xl border border-[#E0DCD5] p-6">

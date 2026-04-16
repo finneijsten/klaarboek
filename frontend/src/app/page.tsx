@@ -41,9 +41,9 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto text-center">
           {[
             { num: "1.2M", label: "ZZP'ers in Nederland" },
-            { num: "95%", label: "Automatische classificatie" },
             { num: "€9,99", label: "Per maand, alles inclusief" },
-            { num: "0", label: "Handmatige invoer nodig" },
+            { num: "< 10 min", label: "BTW-rapport per kwartaal" },
+            { num: "CSV", label: "Bank-import, geen gedoe" },
           ].map((s) => (
             <div key={s.label}>
               <div className="text-4xl font-extrabold text-[#0D9668]">{s.num}</div>
@@ -63,10 +63,10 @@ export default function Home() {
         </p>
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { icon: "🏦", title: "Bank sync", desc: "Koppel ING, Rabo of ABN AMRO via PSD2 Open Banking." },
-            { icon: "🤖", title: "AI-classificatie", desc: "95%+ automatische categorisatie van transacties." },
-            { icon: "📈", title: "BTW op autopilot", desc: "Automatische BTW-berekening per kwartaal." },
-            { icon: "📄", title: "Facturen", desc: "Professionele facturen in seconden." },
+            { icon: "🏦", title: "CSV-import", desc: "Upload bankafschriften van ING, Rabobank, ABN, Bunq, Knab of Revolut." },
+            { icon: "🏷️", title: "Automatische categorisatie", desc: "Slimme regels plaatsen transacties direct in de juiste BTW-categorie." },
+            { icon: "📈", title: "BTW-rapport", desc: "Kwartaalberekening klaar om zelf op belastingdienst.nl in te vullen." },
+            { icon: "📄", title: "Facturen", desc: "Professionele facturen in seconden, inclusief PDF." },
             { icon: "📊", title: "Dashboard", desc: "Inkomsten, uitgaven en BTW in een oogopslag." },
             { icon: "🔒", title: "Veilig", desc: "GDPR-compliant. Data versleuteld." },
           ].map((f) => (

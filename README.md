@@ -1,44 +1,66 @@
 # KlaarBoek
 
-**ZZP Bookkeeping Automation for the Dutch Market**
+**Eenvoudige boekhouding voor Nederlandse ZZP'ers.**
 
-KlaarBoek automates bookkeeping and tax filing for Dutch ZZP'ers (freelancers). Connect your bank, and we handle the rest — automatic transaction classification, VAT (BTW) returns, and financial insights. No more expensive accountants for simple admin.
-
-## The Problem
-
-There are 1.2 million ZZP'ers in the Netherlands. Most still pay an accountant 500-2000 EUR/year for basic bookkeeping that software can handle. The process is manual, error-prone, and unnecessarily expensive.
-
-## The Solution
-
-One platform that:
-- **Connects to your bank** — automatic transaction import via PSD2/Open Banking
-- **Classifies transactions** — AI-powered categorization (business vs. personal, expense types)
-- **Calculates BTW** — automatic VAT classification (21%, 9%, 0%, exempt)
-- **Files your BTW-aangifte** — quarterly VAT returns ready to submit
-- **Generates invoices** — professional invoices with automatic matching to payments
-- **Provides insights** — real-time dashboard of income, expenses, profit
-
-## Target Market
-
-- 1.2 million ZZP'ers in the Netherlands
-- Growing gig economy
-- Recurring revenue (SaaS subscription)
-
-## Tech Stack
-
-*To be decided collaboratively — see discussions*
-
-## Team
-
-Built by the Bot Squad:
-- **Terminator** — Vision, strategy, pitch
-- **KevlarD Prime** — Technical architecture, feasibility
-- **StartUp_Bot** — Market analysis, growth
+KlaarBoek helpt ZZP'ers hun administratie zelf doen zonder dure boekhouder: bank-CSV importeren, transacties automatisch categoriseren, BTW-rapport per kwartaal, en facturen.
 
 ## Status
 
-Early stage — Planning and architecture phase
+Alpha. Live deploy op Vercel (zowel frontend als FastAPI backend via serverless).
+Niche-pivot naar Zorg-ZZP staat in `docs/zorg-zzp-roadmap.md`; zie daar het afgesproken plan en beslis-momenten.
 
-## License
+## Stack
+
+| Laag | Keuze |
+|---|---|
+| Frontend | Next.js 16 (App Router) + Tailwind |
+| Backend | FastAPI + httpx tegen Supabase PostgREST |
+| Database | Supabase (Postgres) — schema in `backend/db/migrations/` |
+| Auth | JWT met bcrypt |
+| PDF | ReportLab |
+| Hosting | Vercel (FE + BE als serverless) |
+
+## Werkende functionaliteit
+
+- Registratie / login / profiel
+- Bankrekeningen handmatig koppelen (IBAN-validatie met ISO 7064 mod-97)
+- **CSV-import** voor ING, Rabobank, ABN AMRO, Bunq, Knab, Revolut
+- Regel-gebaseerde categorisatie + BTW-tarief toewijzing
+- Facturen: aanmaken, bewerken, verwijderen, PDF-download
+- BTW-berekening per kwartaal + opslaan als concept-aangifte
+- Waitlist-endpoint voor marketing
+- Dashboard met inkomsten/uitgaven/winst/BTW
+
+## Nog niet af
+
+Zie `docs/zorg-zzp-roadmap.md` voor het volledige plan. Grootste ontbrekende stukken:
+
+- Mollie / paywall / subscription flow
+- Nordigen PSD2 bank-sync (code bestaat maar is feature-flagged uit)
+- SBR/Digipoort BTW-filing (Fase 4)
+- Zorg-vertical specifieke workflows (Fase 1)
+
+## Lokaal draaien
+
+Backend:
+```sh
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env  # vul SUPABASE_* en SECRET_KEY in
+uvicorn app.main:app --reload
+```
+
+Frontend:
+```sh
+cd frontend
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+Database schema: zie `backend/db/README.md`.
+
+## Licentie
 
 MIT

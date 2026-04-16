@@ -47,3 +47,10 @@ class DashboardSummary(BaseModel):
     btw_owed: float
     profit: float
     transaction_count: int
+
+
+class CategoryBreakdown(BaseModel):
+    category: str
+    total_expenses: float
+    total_income: float
+    transaction_count: int

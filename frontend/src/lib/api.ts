@@ -156,10 +156,36 @@ class ApiClient {
     return this.request<{ classified: number }>("/transactions/classify", { method: "POST" });
   }
 
+  async deleteTransaction(id: number) {
+    if (this.demoMode) return { ok: true };
+    return this.request(`/transactions/${id}`, { method: "DELETE" });
+  }
+
   // Dashboard
-  async getDashboard() {
-    if (this.demoMode) return { total_income: 14000, total_expenses: 650.49, btw_owed: 2441.25, profit: 13349.51, transaction_count: 12 };
-    return this.request<{ total_income: number; total_expenses: number; btw_owed: number; profit: number; transaction_count: number }>("/transactions/dashboard");
+  async getCategoryBreakdown(period: "month" | "quarter" | "ytd" | "all" = "quarter") {
+    if (this.demoMode) {
+      return [
+        { category: "Omzet",         total_income: 14000, total_expenses: 0,      transaction_count: 6 },
+        { category: "Software",      total_income: 0,     total_expenses: 173.99, transaction_count: 3 },
+        { category: "Huisvesting",   total_income: 0,     total_expenses: 125.00, transaction_count: 1 },
+        { category: "Telecom",       total_income: 0,     total_expenses: 89.00,  transaction_count: 1 },
+        { category: "Verzekeringen", total_income: 0,     total_expenses: 312.50, transaction_count: 1 },
+      ];
+    }
+    return this.request<Array<{ category: string; total_income: number; total_expenses: number; transaction_count: number }>>(`/transactions/categories?period=${period}`);
+  }
+
+  async getDashboard(period: "month" | "quarter" | "ytd" | "all" = "quarter") {
+    if (this.demoMode) {
+      const demo = {
+        month:   { total_income: 6450,  total_expenses: 199.99, btw_owed: 1083.77, profit: 6250.01,  transaction_count: 5 },
+        quarter: { total_income: 14000, total_expenses: 650.49, btw_owed: 2320.97, profit: 13349.51, transaction_count: 12 },
+        ytd:     { total_income: 14000, total_expenses: 650.49, btw_owed: 2320.97, profit: 13349.51, transaction_count: 12 },
+        all:     { total_income: 32200, total_expenses: 3800.49, btw_owed: 4920.80, profit: 28399.51, transaction_count: 27 },
+      };
+      return demo[period];
+    }
+    return this.request<{ total_income: number; total_expenses: number; btw_owed: number; profit: number; transaction_count: number }>(`/transactions/dashboard?period=${period}`);
   }
 
   // Transactions
@@ -179,7 +205,7 @@ class ApiClient {
     return this.request<typeof DEMO_INVOICES>(`/invoices/?limit=${limit}&offset=${_offset}`);
   }
 
-  async createInvoice(data: { client_name: string; invoice_number?: string; amount_excl_btw: number; btw_rate?: number; due_date?: string }) {
+  async createInvoice(data: { client_name: string; client_email?: string; description?: string; invoice_number?: string; amount_excl_btw: number; btw_rate?: number; due_date?: string }) {
     if (this.demoMode) { const rate = data.btw_rate ?? 21; const btwAmt = data.amount_excl_btw * rate / 100; return { id: 99, user_id: 1, invoice_number: data.invoice_number ?? "2026-006", client_name: data.client_name, amount_excl_btw: data.amount_excl_btw, btw_rate: rate, btw_amount: btwAmt, amount_incl_btw: data.amount_excl_btw + btwAmt, due_date: data.due_date ?? null, is_paid: false, matched_transaction_id: null, created_at: new Date().toISOString().split("T")[0] }; }
     return this.request("/invoices/", { method: "POST", body: JSON.stringify(data) });
   }
@@ -239,6 +265,59 @@ class ApiClient {
   async deleteBankConnection(id: number) {
     if (this.demoMode) return { ok: true };
     return this.request(`/banks/${id}`, { method: "DELETE" });
+  }
+
+  async deleteAccount() {
+    if (this.demoMode) {
+      alert("Account verwijderen is niet beschikbaar in demo modus");
+      return;
+    }
+    const headers: Record<string, string> = {};
+    if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
+    const res = await fetch(`${API_BASE}/auth/me`, { method: "DELETE", headers });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Verwijderen mislukt" }));
+      throw new Error(err.detail || "Verwijderen mislukt");
+    }
+    this.clearToken();
+  }
+
+  async exportData() {
+    if (this.demoMode) {
+      alert("Data-export is niet beschikbaar in demo modus");
+      return;
+    }
+    const headers: Record<string, string> = {};
+    if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
+    const res = await fetch(`${API_BASE}/auth/export`, { headers });
+    if (!res.ok) throw new Error("Export mislukt");
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "klaarboek-export.zip";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async importBankCSV(connectionId: number, file: File): Promise<{ imported: number; skipped: number }> {
+    if (this.demoMode) {
+      return { imported: 0, skipped: 0 };
+    }
+    const fd = new FormData();
+    fd.append("file", file);
+    const headers: Record<string, string> = {};
+    if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
+    const res = await fetch(`${API_BASE}/banks/${connectionId}/import`, {
+      method: "POST",
+      headers,
+      body: fd,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Import mislukt" }));
+      throw new Error(err.detail || "Import mislukt");
+    }
+    return res.json();
   }
 
   isLoggedIn() {

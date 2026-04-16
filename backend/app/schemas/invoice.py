@@ -4,7 +4,9 @@ from datetime import datetime
 
 class InvoiceCreate(BaseModel):
     client_name: str
+    client_email: str | None = None
     invoice_number: str | None = None
+    description: str | None = None
     amount_excl_btw: float
     btw_rate: float = 21.0
     due_date: str | None = None
@@ -12,6 +14,8 @@ class InvoiceCreate(BaseModel):
 
 class InvoiceUpdate(BaseModel):
     client_name: str | None = None
+    client_email: str | None = None
+    description: str | None = None
     amount_excl_btw: float | None = None
     btw_rate: float | None = None
     due_date: str | None = None
