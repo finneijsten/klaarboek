@@ -114,6 +114,38 @@ def test_dashboard_bad_period(client):
     assert client.get("/transactions/dashboard?period=nope").status_code == 400
 
 
+def test_categories_breakdown(client, mock_db):
+    seed_bank(mock_db)
+    client.post("/transactions/", json={
+        "bank_connection_id": 1, "date": "2026-03-01T00:00:00",
+        "amount": 100.0, "is_income": False, "category": "Kantoor",
+    })
+    client.post("/transactions/", json={
+        "bank_connection_id": 1, "date": "2026-03-02T00:00:00",
+        "amount": 50.0, "is_income": False, "category": "Kantoor",
+    })
+    client.post("/transactions/", json={
+        "bank_connection_id": 1, "date": "2026-03-03T00:00:00",
+        "amount": 30.0, "is_income": False, "category": "Transport",
+    })
+
+    data = client.get("/transactions/categories?period=all").json()
+    # Kantoor first (larger expense), Transport second.
+    assert [c["category"] for c in data] == ["Kantoor", "Transport"]
+    assert data[0]["total_expenses"] == 150.0
+    assert data[0]["transaction_count"] == 2
+
+
+def test_categories_excludes_non_business(client, mock_db):
+    seed_bank(mock_db)
+    client.post("/transactions/", json={
+        "bank_connection_id": 1, "date": "2026-03-01T00:00:00",
+        "amount": 100.0, "is_income": False, "category": "Boodschappen",
+        "is_business": False,
+    })
+    assert client.get("/transactions/categories?period=all").json() == []
+
+
 def test_dashboard_with_transactions(client, mock_db):
     seed_bank(mock_db)
     client.post("/transactions/", json={

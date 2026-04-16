@@ -3,7 +3,10 @@ from datetime import date, datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.database import SupabaseClient, get_db
-from app.schemas.transaction import TransactionCreate, TransactionUpdate, TransactionResponse, DashboardSummary
+from app.schemas.transaction import (
+    TransactionCreate, TransactionUpdate, TransactionResponse,
+    DashboardSummary, CategoryBreakdown,
+)
 from app.auth import get_current_user
 from app.classifier import classify_transaction
 from app.btw import canonical_btw_rate, summarise_transactions
@@ -122,6 +125,46 @@ async def update_transaction(
 
     result = await db.update("transactions", {"id": transaction_id}, update_data)
     return result[0]
+
+
+@router.get("/categories", response_model=list[CategoryBreakdown])
+async def categories_breakdown(
+    period: str = "quarter",
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    """Group income/expense totals by category for the requested period."""
+    if period not in ("month", "quarter", "ytd", "all"):
+        raise HTTPException(status_code=400, detail="invalid period")
+
+    txs = await _user_transactions(db, user["id"])
+    start, end = _period_range(period)
+    if start and end:
+        txs = [t for t in txs if (t.get("date") or "") >= start and (t.get("date") or "") < end]
+
+    buckets: dict[str, dict] = {}
+    for t in txs:
+        if not t.get("is_business", True):
+            continue
+        key = t.get("category") or "Overig"
+        b = buckets.setdefault(
+            key, {"category": key, "total_expenses": 0.0, "total_income": 0.0, "transaction_count": 0},
+        )
+        amount = abs(float(t.get("amount") or 0))
+        if t.get("is_income"):
+            b["total_income"] += amount
+        else:
+            b["total_expenses"] += amount
+        b["transaction_count"] += 1
+
+    # Stable sort: largest expense first, then largest income.
+    out = list(buckets.values())
+    out.sort(key=lambda x: (-x["total_expenses"], -x["total_income"]))
+    # Round to 2dp in the response, for display parity with the rest of the API.
+    for b in out:
+        b["total_expenses"] = round(b["total_expenses"], 2)
+        b["total_income"] = round(b["total_income"], 2)
+    return out
 
 
 @router.delete("/{transaction_id}", status_code=204)

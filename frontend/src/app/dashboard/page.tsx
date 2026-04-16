@@ -25,6 +25,13 @@ type Transaction = {
   is_income: boolean;
 };
 
+type CategoryBreakdown = {
+  category: string;
+  total_income: number;
+  total_expenses: number;
+  transaction_count: number;
+};
+
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(amount);
 }
@@ -46,6 +53,7 @@ export default function Dashboard() {
   const router = useRouter();
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<CategoryBreakdown[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>("quarter");
@@ -58,12 +66,14 @@ export default function Dashboard() {
 
     async function fetchData() {
       try {
-        const [dashData, txData] = await Promise.all([
+        const [dashData, txData, catData] = await Promise.all([
           api.getDashboard(period),
           api.getTransactions(10),
+          api.getCategoryBreakdown(period),
         ]);
         setDashboard(dashData);
         setTransactions(txData);
+        setCategories(catData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Fout bij laden");
       } finally {
@@ -165,6 +175,38 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
+
+              {/* Category breakdown */}
+              {categories.length > 0 && (
+                <div className="bg-white rounded-2xl border border-[#E0DCD5] p-6 mb-8">
+                  <h2 className="text-lg font-bold text-[#1A1A2E] mb-4">Uitgaven per categorie</h2>
+                  {(() => {
+                    const expenseRows = categories.filter((c) => c.total_expenses > 0);
+                    if (expenseRows.length === 0) {
+                      return <p className="text-sm text-[#636E72]">Nog geen uitgaven in deze periode.</p>;
+                    }
+                    const max = Math.max(...expenseRows.map((c) => c.total_expenses));
+                    return (
+                      <div className="space-y-3">
+                        {expenseRows.slice(0, 8).map((c) => (
+                          <div key={c.category}>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span className="text-[#1A1A2E] font-medium">{c.category}</span>
+                              <span className="text-[#636E72]">{formatCurrency(c.total_expenses)}</span>
+                            </div>
+                            <div className="h-2 bg-[#EDEAE4] rounded-full overflow-hidden">
+                              <div
+                                className="h-2 bg-[#0D9668]"
+                                style={{ width: `${Math.max(4, (c.total_expenses / max) * 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
 
               {/* Recent transactions */}
               <div className="bg-white rounded-2xl border border-[#E0DCD5] p-6">

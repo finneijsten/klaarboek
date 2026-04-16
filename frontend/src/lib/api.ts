@@ -162,6 +162,19 @@ class ApiClient {
   }
 
   // Dashboard
+  async getCategoryBreakdown(period: "month" | "quarter" | "ytd" | "all" = "quarter") {
+    if (this.demoMode) {
+      return [
+        { category: "Omzet",         total_income: 14000, total_expenses: 0,      transaction_count: 6 },
+        { category: "Software",      total_income: 0,     total_expenses: 173.99, transaction_count: 3 },
+        { category: "Huisvesting",   total_income: 0,     total_expenses: 125.00, transaction_count: 1 },
+        { category: "Telecom",       total_income: 0,     total_expenses: 89.00,  transaction_count: 1 },
+        { category: "Verzekeringen", total_income: 0,     total_expenses: 312.50, transaction_count: 1 },
+      ];
+    }
+    return this.request<Array<{ category: string; total_income: number; total_expenses: number; transaction_count: number }>>(`/transactions/categories?period=${period}`);
+  }
+
   async getDashboard(period: "month" | "quarter" | "ytd" | "all" = "quarter") {
     if (this.demoMode) {
       const demo = {
