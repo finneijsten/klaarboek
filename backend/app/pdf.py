@@ -64,10 +64,11 @@ def generate_invoice_pdf(invoice: dict, user: dict) -> bytes:
     btw_amount = invoice.get("btw_amount", 0)
     amount_incl = invoice.get("amount_incl_btw", 0)
 
+    line_description = invoice.get("description") or f"Diensten voor {client}"
     data = [
         ["Omschrijving", "BTW", "Bedrag excl.", "BTW bedrag", "Bedrag incl."],
         [
-            f"Diensten voor {client}",
+            line_description,
             f"{btw_rate}%",
             f"\u20ac {amount_excl:,.2f}",
             f"\u20ac {btw_amount:,.2f}",

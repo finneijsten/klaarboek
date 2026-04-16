@@ -95,6 +95,16 @@ export default function TransactionsPage() {
     }
   }
 
+  async function handleDelete(tx: Transaction) {
+    if (!confirm("Transactie verwijderen?")) return;
+    try {
+      await api.deleteTransaction(tx.id);
+      setTransactions((prev) => prev.filter((t) => t.id !== tx.id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Fout bij verwijderen");
+    }
+  }
+
   async function addTransaction() {
     if (!bankConnId) {
       setError("Voeg eerst een bankrekening toe bij Instellingen");
@@ -381,12 +391,20 @@ export default function TransactionsPage() {
                                 </button>
                               </div>
                             ) : (
-                              <button
-                                onClick={() => startEdit(tx)}
-                                className="text-xs text-[#636E72] hover:text-[#0D9668]"
-                              >
-                                Bewerk
-                              </button>
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  onClick={() => startEdit(tx)}
+                                  className="text-xs text-[#636E72] hover:text-[#0D9668]"
+                                >
+                                  Bewerk
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(tx)}
+                                  className="text-xs text-red-500 hover:text-red-700"
+                                >
+                                  ×
+                                </button>
+                              </div>
                             )}
                           </td>
                         </tr>

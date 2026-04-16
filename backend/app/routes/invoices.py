@@ -66,6 +66,8 @@ async def create_invoice(
         "user_id": user["id"],
         "invoice_number": invoice_number,
         "client_name": data.client_name,
+        "client_email": data.client_email,
+        "description": data.description,
         "amount_excl_btw": data.amount_excl_btw,
         "btw_rate": data.btw_rate,
         "btw_amount": btw_amount,

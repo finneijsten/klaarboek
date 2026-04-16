@@ -73,6 +73,21 @@ def test_dashboard_empty(client, mock_db):
     assert data["transaction_count"] == 0
 
 
+def test_delete_transaction(client, mock_db):
+    seed_bank(mock_db)
+    client.post("/transactions/", json={
+        "bank_connection_id": 1, "date": "2026-03-15T00:00:00", "amount": 75.0,
+    })
+    tx_id = client.get("/transactions/").json()[0]["id"]
+
+    assert client.delete(f"/transactions/{tx_id}").status_code == 204
+    assert client.get("/transactions/").json() == []
+
+
+def test_delete_transaction_not_found(client):
+    assert client.delete("/transactions/999").status_code == 404
+
+
 def test_dashboard_with_transactions(client, mock_db):
     seed_bank(mock_db)
     client.post("/transactions/", json={

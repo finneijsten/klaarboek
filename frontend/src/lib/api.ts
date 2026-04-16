@@ -156,6 +156,11 @@ class ApiClient {
     return this.request<{ classified: number }>("/transactions/classify", { method: "POST" });
   }
 
+  async deleteTransaction(id: number) {
+    if (this.demoMode) return { ok: true };
+    return this.request(`/transactions/${id}`, { method: "DELETE" });
+  }
+
   // Dashboard
   async getDashboard() {
     if (this.demoMode) return { total_income: 14000, total_expenses: 650.49, btw_owed: 2441.25, profit: 13349.51, transaction_count: 12 };
@@ -179,7 +184,7 @@ class ApiClient {
     return this.request<typeof DEMO_INVOICES>(`/invoices/?limit=${limit}&offset=${_offset}`);
   }
 
-  async createInvoice(data: { client_name: string; invoice_number?: string; amount_excl_btw: number; btw_rate?: number; due_date?: string }) {
+  async createInvoice(data: { client_name: string; client_email?: string; description?: string; invoice_number?: string; amount_excl_btw: number; btw_rate?: number; due_date?: string }) {
     if (this.demoMode) { const rate = data.btw_rate ?? 21; const btwAmt = data.amount_excl_btw * rate / 100; return { id: 99, user_id: 1, invoice_number: data.invoice_number ?? "2026-006", client_name: data.client_name, amount_excl_btw: data.amount_excl_btw, btw_rate: rate, btw_amount: btwAmt, amount_incl_btw: data.amount_excl_btw + btwAmt, due_date: data.due_date ?? null, is_paid: false, matched_transaction_id: null, created_at: new Date().toISOString().split("T")[0] }; }
     return this.request("/invoices/", { method: "POST", body: JSON.stringify(data) });
   }

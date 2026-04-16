@@ -36,6 +36,8 @@ export default function InvoicesPage() {
 
   // Form state
   const [clientName, setClientName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [description, setDescription] = useState("");
   const [amountExcl, setAmountExcl] = useState("");
   const [btwRate, setBtwRate] = useState("21");
   const [dueDate, setDueDate] = useState("");
@@ -63,11 +65,15 @@ export default function InvoicesPage() {
     try {
       await api.createInvoice({
         client_name: clientName,
+        client_email: clientEmail || undefined,
+        description: description || undefined,
         amount_excl_btw: parseFloat(amountExcl),
         btw_rate: parseFloat(btwRate),
         due_date: dueDate || undefined,
       });
       setClientName("");
+      setClientEmail("");
+      setDescription("");
       setAmountExcl("");
       setBtwRate("21");
       setDueDate("");
@@ -163,6 +169,26 @@ export default function InvoicesPage() {
                         required
                         value={clientName}
                         onChange={(e) => setClientName(e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg border border-[#E0DCD5] text-sm text-[#1A1A2E] focus:outline-none focus:border-[#0D9668]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-[#636E72] mb-1">E-mail klant</label>
+                      <input
+                        type="email"
+                        value={clientEmail}
+                        onChange={(e) => setClientEmail(e.target.value)}
+                        placeholder="factuur@klant.nl"
+                        className="w-full px-4 py-2 rounded-lg border border-[#E0DCD5] text-sm text-[#1A1A2E] focus:outline-none focus:border-[#0D9668]"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm text-[#636E72] mb-1">Omschrijving</label>
+                      <input
+                        type="text"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="bijv. Website ontwerp maart 2026"
                         className="w-full px-4 py-2 rounded-lg border border-[#E0DCD5] text-sm text-[#1A1A2E] focus:outline-none focus:border-[#0D9668]"
                       />
                     </div>

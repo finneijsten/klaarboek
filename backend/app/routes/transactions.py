@@ -95,6 +95,23 @@ async def update_transaction(
     return result[0]
 
 
+@router.delete("/{transaction_id}", status_code=204)
+async def delete_transaction(
+    transaction_id: int,
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    connections = await db.select("bank_connections", columns="id",
+                                  filters={"user_id": user["id"]})
+    conn_ids = [c["id"] for c in connections] if connections else []
+
+    txs = await db.select("transactions", filters={"id": transaction_id})
+    if not txs or txs[0].get("bank_connection_id") not in conn_ids:
+        raise HTTPException(status_code=404, detail="Transactie niet gevonden")
+
+    await db.delete("transactions", {"id": transaction_id})
+
+
 @router.post("/classify")
 async def classify_all_transactions(
     user: dict = Depends(get_current_user),
