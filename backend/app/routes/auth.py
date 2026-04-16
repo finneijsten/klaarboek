@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.database import SupabaseClient, get_db
 from app.schemas.user import UserCreate, UserUpdate, UserResponse, Token
 from app.auth import hash_password, verify_password, create_access_token, get_current_user
+from app.export import build_export
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -55,3 +57,18 @@ async def update_profile(
 
     result = await db.update("users", {"id": user["id"]}, update_data)
     return result[0]
+
+
+@router.get("/export")
+async def export_my_data(
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    """Download a ZIP of the authenticated user's data (GDPR portability)."""
+    zip_bytes = await build_export(db, user)
+    filename = f"klaarboek-export-{user['id']}.zip"
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

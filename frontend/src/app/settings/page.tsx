@@ -336,6 +336,27 @@ export default function SettingsPage() {
               </form>
             )}
           </div>
+
+          {/* Data export */}
+          <div className="bg-white rounded-2xl border border-[#E0DCD5] p-6 mt-8">
+            <h2 className="text-lg font-bold text-[#1A1A2E] mb-2">Mijn data</h2>
+            <p className="text-sm text-[#636E72] mb-4">
+              Download al je gegevens als ZIP: profiel, bankrekeningen, transacties,
+              facturen en BTW-aangiftes.
+            </p>
+            <button
+              onClick={async () => {
+                try {
+                  await api.exportData();
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Export mislukt");
+                }
+              }}
+              className="px-6 py-2 bg-[#1A1A2E] text-white rounded-lg text-sm font-medium hover:bg-[#2A2A3E]"
+            >
+              Data exporteren (ZIP)
+            </button>
+          </div>
         </main>
       </div>
     </div>

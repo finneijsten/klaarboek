@@ -241,6 +241,24 @@ class ApiClient {
     return this.request(`/banks/${id}`, { method: "DELETE" });
   }
 
+  async exportData() {
+    if (this.demoMode) {
+      alert("Data-export is niet beschikbaar in demo modus");
+      return;
+    }
+    const headers: Record<string, string> = {};
+    if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
+    const res = await fetch(`${API_BASE}/auth/export`, { headers });
+    if (!res.ok) throw new Error("Export mislukt");
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "klaarboek-export.zip";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async importBankCSV(connectionId: number, file: File): Promise<{ imported: number; skipped: number }> {
     if (this.demoMode) {
       return { imported: 0, skipped: 0 };
