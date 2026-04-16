@@ -4,8 +4,27 @@ from app.database import SupabaseClient, get_db
 from app.schemas.transaction import TransactionCreate, TransactionUpdate, TransactionResponse, DashboardSummary
 from app.auth import get_current_user
 from app.classifier import classify_transaction
+from app.btw import canonical_btw_rate, summarise_transactions
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
+
+
+async def _user_transactions(db: SupabaseClient, user_id: int,
+                             limit: int | None = None, offset: int = 0) -> list[dict]:
+    """Fetch all transactions belonging to a user via their bank connections."""
+    connections = await db.select("bank_connections", columns="id",
+                                  filters={"user_id": user_id})
+    if not connections:
+        return []
+    conn_ids = [c["id"] for c in connections]
+    txs = await db.select(
+        "transactions",
+        filters={"bank_connection_id": {"in": f"({','.join(str(i) for i in conn_ids)})"}},
+        order="date.desc",
+        limit=limit,
+        offset=offset,
+    )
+    return txs
 
 
 @router.get("/", response_model=list[TransactionResponse])
@@ -15,28 +34,7 @@ async def list_transactions(
     user: dict = Depends(get_current_user),
     db: SupabaseClient = Depends(get_db),
 ):
-    # Get user's bank connections
-    connections = await db.select("bank_connections", columns="id", filters={"user_id": user["id"]})
-    if not connections:
-        return []
-
-    conn_ids = [c["id"] for c in connections]
-
-    # Get transactions for those connections
-    all_transactions = []
-    for conn_id in conn_ids:
-        txs = await db.select(
-            "transactions",
-            filters={"bank_connection_id": conn_id},
-            order="date.desc",
-            limit=limit,
-            offset=offset,
-        )
-        all_transactions.extend(txs)
-
-    # Sort by date descending and apply limit
-    all_transactions.sort(key=lambda x: x.get("date", ""), reverse=True)
-    return all_transactions[:limit]
+    return await _user_transactions(db, user["id"], limit=limit, offset=offset)
 
 
 @router.post("/", response_model=TransactionResponse, status_code=201)
@@ -55,10 +53,18 @@ async def create_transaction(
 
     tx_data = data.model_dump(mode="json")
 
-    # Auto-classify if no category provided
+    # Store amount as magnitude; direction is on `is_income`.
+    tx_data["amount"] = abs(float(tx_data.get("amount") or 0))
+
+    # Auto-classify if no category provided. Only fill gaps — never overwrite
+    # fields the caller explicitly set.
     if not tx_data.get("category"):
         classification = classify_transaction(tx_data.get("description"), tx_data.get("counterparty"))
-        tx_data.update(classification)
+        for k, v in classification.items():
+            if tx_data.get(k) in (None, ""):
+                tx_data[k] = v
+
+    tx_data["btw_rate"] = canonical_btw_rate(tx_data.get("btw_rate"))
 
     tx = await db.insert("transactions", tx_data)
     return tx
@@ -80,6 +86,8 @@ async def update_transaction(
         raise HTTPException(status_code=404, detail="Transactie niet gevonden")
 
     update_data = data.model_dump(exclude_none=True)
+    if "btw_rate" in update_data:
+        update_data["btw_rate"] = canonical_btw_rate(update_data["btw_rate"])
     if not update_data:
         return txs[0]
 
@@ -92,24 +100,17 @@ async def classify_all_transactions(
     user: dict = Depends(get_current_user),
     db: SupabaseClient = Depends(get_db),
 ):
-    """Auto-classify all unclassified transactions for the current user."""
-    connections = await db.select("bank_connections", columns="id", filters={"user_id": user["id"]})
-    if not connections:
-        return {"classified": 0}
-
+    """Auto-classify all transactions without a category for the current user."""
+    txs = await _user_transactions(db, user["id"])
     classified_count = 0
-    for conn in connections:
-        txs = await db.select("transactions", filters={
-            "bank_connection_id": conn["id"],
-            "classified_by": "manual",
-        })
-        for tx in txs:
-            if tx.get("category"):
-                continue
-            result = classify_transaction(tx.get("description"), tx.get("counterparty"))
-            if result["category"]:
-                await db.update("transactions", {"id": tx["id"]}, result)
-                classified_count += 1
+    for tx in txs:
+        if tx.get("category"):
+            continue
+        result = classify_transaction(tx.get("description"), tx.get("counterparty"))
+        if result.get("category"):
+            result["btw_rate"] = canonical_btw_rate(result.get("btw_rate"))
+            await db.update("transactions", {"id": tx["id"]}, result)
+            classified_count += 1
 
     return {"classified": classified_count}
 
@@ -119,28 +120,12 @@ async def dashboard_summary(
     user: dict = Depends(get_current_user),
     db: SupabaseClient = Depends(get_db),
 ):
-    # Get user's bank connections
-    connections = await db.select("bank_connections", columns="id", filters={"user_id": user["id"]})
-
-    if not connections:
-        return DashboardSummary(
-            total_income=0, total_expenses=0, btw_owed=0, profit=0, transaction_count=0
-        )
-
-    # Get all transactions
-    all_transactions = []
-    for conn in connections:
-        txs = await db.select("transactions", filters={"bank_connection_id": conn["id"]})
-        all_transactions.extend(txs)
-
-    total_income = sum(t["amount"] for t in all_transactions if t.get("is_income"))
-    total_expenses = sum(abs(t["amount"]) for t in all_transactions if not t.get("is_income"))
-    btw_owed = round(total_income * 0.21 - total_expenses * 0.21, 2)
-
+    all_transactions = await _user_transactions(db, user["id"])
+    summary = summarise_transactions(all_transactions)
     return DashboardSummary(
-        total_income=total_income,
-        total_expenses=total_expenses,
-        btw_owed=btw_owed,
-        profit=round(total_income - total_expenses, 2),
+        total_income=summary["total_income"],
+        total_expenses=summary["total_expenses"],
+        btw_owed=summary["btw_owed"],
+        profit=summary["profit"],
         transaction_count=len(all_transactions),
     )

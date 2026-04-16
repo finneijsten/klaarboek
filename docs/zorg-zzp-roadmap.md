@@ -7,6 +7,14 @@
 
 **Werkwijze:** Vink top-down af. Geen substap overslaan tenzij expliciet gemarkeerd als "optioneel". Bij twijfel: interviews opnieuw raadplegen (zie fase 0).
 
+> **Status-update (2026-04-16):** er staat al een generieke ZZP-implementatie live
+> (auth, facturen, BTW-rapport, CSV-import, dashboard). Fase 0 "GEEN CODE TOT
+> 8+ INTERVIEWS" is dus feitelijk achterhaald voor het generieke product — de
+> regel blijft wel staan voor het **zorg-specifieke** werk in Fase 1. Dus:
+> geen AGB/BIG-velden, Vektis-lookup, declaratie-flow of zorg-landing bouwen
+> vóór de 8+ interviews afgerond zijn. Wat er nu staat is generiek ZZP en dat
+> laten we zo tot validatie klaar is.
+
 ---
 
 ## Fase 0 — Validatie (2-3 weken) — GEEN CODE TOT 8+ INTERVIEWS GEDAAN

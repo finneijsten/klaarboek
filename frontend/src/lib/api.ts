@@ -241,6 +241,26 @@ class ApiClient {
     return this.request(`/banks/${id}`, { method: "DELETE" });
   }
 
+  async importBankCSV(connectionId: number, file: File): Promise<{ imported: number; skipped: number }> {
+    if (this.demoMode) {
+      return { imported: 0, skipped: 0 };
+    }
+    const fd = new FormData();
+    fd.append("file", file);
+    const headers: Record<string, string> = {};
+    if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
+    const res = await fetch(`${API_BASE}/banks/${connectionId}/import`, {
+      method: "POST",
+      headers,
+      body: fd,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Import mislukt" }));
+      throw new Error(err.detail || "Import mislukt");
+    }
+    return res.json();
+  }
+
   isLoggedIn() {
     return !!this.token;
   }

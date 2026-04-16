@@ -92,6 +92,17 @@ export default function InvoicesPage() {
     }
   }
 
+  async function handleDelete(invoice: Invoice) {
+    const label = invoice.invoice_number || `#${invoice.id}`;
+    if (!confirm(`Factuur ${label} verwijderen?`)) return;
+    try {
+      await api.deleteInvoice(invoice.id);
+      setInvoices((prev) => prev.filter((inv) => inv.id !== invoice.id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Fout bij verwijderen");
+    }
+  }
+
   const totalOpen = invoices.filter((i) => !i.is_paid).reduce((s, i) => s + i.amount_incl_btw, 0);
   const totalPaid = invoices.filter((i) => i.is_paid).reduce((s, i) => s + i.amount_incl_btw, 0);
 
@@ -249,12 +260,20 @@ export default function InvoicesPage() {
                             </button>
                           </td>
                           <td className="py-3 text-center">
-                            <button
-                              onClick={() => api.downloadInvoicePdf(inv.id)}
-                              className="text-xs text-[#0D9668] hover:text-[#0B7D56] font-medium"
-                            >
-                              PDF
-                            </button>
+                            <div className="flex items-center justify-center gap-3">
+                              <button
+                                onClick={() => api.downloadInvoicePdf(inv.id)}
+                                className="text-xs text-[#0D9668] hover:text-[#0B7D56] font-medium"
+                              >
+                                PDF
+                              </button>
+                              <button
+                                onClick={() => handleDelete(inv)}
+                                className="text-xs text-red-500 hover:text-red-700 font-medium"
+                              >
+                                Verwijderen
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}

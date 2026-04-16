@@ -16,15 +16,28 @@ def test_register(client, mock_db):
     assert "hashed_password" not in data
 
 
+def test_register_rejects_short_password(client):
+    res = client.post("/auth/register", json={
+        "email": "ok@test.nl", "password": "short",
+    })
+    assert res.status_code == 422
+
+
+def test_register_rejects_bad_email(client):
+    res = client.post("/auth/register", json={
+        "email": "not-an-email", "password": "longenoughpassword",
+    })
+    assert res.status_code == 422
+
+
 def test_register_duplicate(client, mock_db):
     client.post("/auth/register", json={
         "email": "dup@test.nl", "password": "test1234",
-        "kvk_number": None, "btw_number": None,
     })
     res = client.post("/auth/register", json={
-        "email": "dup@test.nl", "password": "test1234",
-        "kvk_number": None, "btw_number": None,
+        "email": "DUP@test.nl", "password": "test1234",
     })
+    # Case-insensitive duplicate check.
     assert res.status_code == 400
 
 

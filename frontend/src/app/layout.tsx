@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KlaarBoek — Boekhouding op autopilot voor ZZP'ers",
-  description: "AI-powered bookkeeping automation for Dutch freelancers. Bank sync, automatic transaction classification, BTW filing.",
+  title: "KlaarBoek — Eenvoudige boekhouding voor ZZP'ers",
+  description: "Bookkeeping voor Nederlandse ZZP'ers: CSV bank-import, automatische categorisatie, BTW-rapport per kwartaal en facturen.",
 };
 
 export default function RootLayout({

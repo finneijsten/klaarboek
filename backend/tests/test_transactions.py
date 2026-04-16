@@ -1,13 +1,5 @@
 """Tests for transaction routes."""
-import asyncio
-
-
-def _seed_bank(mock_db):
-    asyncio.get_event_loop().run_until_complete(
-        mock_db.insert("bank_connections", {
-            "user_id": 1, "bank_name": "ING", "iban": "NL00INGB0001234567", "is_active": True,
-        })
-    )
+from tests.conftest import seed_bank
 
 
 def test_list_transactions_empty(client, mock_db):
@@ -17,7 +9,7 @@ def test_list_transactions_empty(client, mock_db):
 
 
 def test_create_transaction(client, mock_db):
-    _seed_bank(mock_db)
+    seed_bank(mock_db)
 
     res = client.post("/transactions/", json={
         "bank_connection_id": 1,
@@ -30,9 +22,22 @@ def test_create_transaction(client, mock_db):
     assert res.status_code == 201
     data = res.json()
     assert data["amount"] == 150.0
-    # Auto-classified
     assert data["category"] == "Abonnementen"
+    assert data["btw_rate"] == "21"  # canonicalised, no '%' suffix
     assert data["classified_by"] == "auto"
+
+
+def test_create_transaction_normalises_negative_amount(client, mock_db):
+    seed_bank(mock_db)
+    res = client.post("/transactions/", json={
+        "bank_connection_id": 1,
+        "date": "2026-03-15T00:00:00",
+        "amount": -200.0,
+        "is_income": False,
+    })
+    assert res.status_code == 201
+    # We always store magnitude; direction lives on is_income.
+    assert res.json()["amount"] == 200.0
 
 
 def test_create_transaction_wrong_connection(client, mock_db):
@@ -45,21 +50,19 @@ def test_create_transaction_wrong_connection(client, mock_db):
 
 
 def test_update_transaction(client, mock_db):
-    _seed_bank(mock_db)
-    # Create a transaction first
+    seed_bank(mock_db)
     client.post("/transactions/", json={
         "bank_connection_id": 1,
         "date": "2026-03-15T00:00:00",
         "amount": 100.0,
     })
+    tx_id = client.get("/transactions/").json()[0]["id"]
 
-    # Get the transaction ID
-    txs = client.get("/transactions/").json()
-    tx_id = txs[0]["id"]
-
-    res = client.patch(f"/transactions/{tx_id}", json={"category": "Kantoor", "btw_rate": "21"})
+    res = client.patch(f"/transactions/{tx_id}", json={"category": "Kantoor", "btw_rate": "21%"})
     assert res.status_code == 200
     assert res.json()["category"] == "Kantoor"
+    # btw_rate is canonicalised on update too
+    assert res.json()["btw_rate"] == "21"
 
 
 def test_dashboard_empty(client, mock_db):
@@ -71,20 +74,20 @@ def test_dashboard_empty(client, mock_db):
 
 
 def test_dashboard_with_transactions(client, mock_db):
-    _seed_bank(mock_db)
-    # Income
+    seed_bank(mock_db)
     client.post("/transactions/", json={
         "bank_connection_id": 1, "date": "2026-03-01T00:00:00",
-        "amount": 1000.0, "is_income": True,
+        "amount": 1210.0, "is_income": True, "btw_rate": "21",
     })
-    # Expense
     client.post("/transactions/", json={
         "bank_connection_id": 1, "date": "2026-03-02T00:00:00",
-        "amount": 200.0, "is_income": False,
+        "amount": 242.0, "is_income": False, "btw_rate": "21",
     })
 
-    res = client.get("/transactions/dashboard")
-    data = res.json()
+    data = client.get("/transactions/dashboard").json()
     assert data["transaction_count"] == 2
-    assert data["total_income"] == 1000.0
-    assert data["total_expenses"] == 200.0
+    assert data["total_income"] == 1210.0
+    assert data["total_expenses"] == 242.0
+    # BTW collected = 1210 * 21 / 121 = 210; paid = 242 * 21 / 121 = 42; owed = 168.
+    assert data["btw_owed"] == 168.0
+    assert data["profit"] == 968.0

@@ -13,7 +13,7 @@ class BTWDeclarationResponse(BaseModel):
     btw_paid: float
     btw_owed: float
     status: str
-    submitted_at: datetime | None
+    submitted_at: datetime | None = None
     created_at: datetime
 
     class Config:

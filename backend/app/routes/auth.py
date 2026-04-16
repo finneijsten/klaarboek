@@ -1,26 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 
-from app.config import settings
 from app.database import SupabaseClient, get_db
 from app.schemas.user import UserCreate, UserUpdate, UserResponse, Token
 from app.auth import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/register", response_model=UserResponse, status_code=201)
-@limiter.limit(settings.register_rate_limit)
-async def register(request: Request, user_data: UserCreate, db: SupabaseClient = Depends(get_db)):
-    existing = await db.select("users", filters={"email": user_data.email})
+async def register(user_data: UserCreate, db: SupabaseClient = Depends(get_db)):
+    email = user_data.email.lower().strip()
+    existing = await db.select("users", filters={"email": email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     user = await db.insert("users", {
-        "email": user_data.email,
+        "email": email,
         "hashed_password": hash_password(user_data.password),
         "kvk_number": user_data.kvk_number,
         "btw_number": user_data.btw_number,
@@ -30,9 +26,9 @@ async def register(request: Request, user_data: UserCreate, db: SupabaseClient =
 
 
 @router.post("/login", response_model=Token)
-@limiter.limit(settings.login_rate_limit)
-async def login(request: Request, form: OAuth2PasswordRequestForm = Depends(), db: SupabaseClient = Depends(get_db)):
-    users = await db.select("users", filters={"email": form.username})
+async def login(form: OAuth2PasswordRequestForm = Depends(),
+                db: SupabaseClient = Depends(get_db)):
+    users = await db.select("users", filters={"email": form.username.lower().strip()})
 
     if not users or not verify_password(form.password, users[0]["hashed_password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")

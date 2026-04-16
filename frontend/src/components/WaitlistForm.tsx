@@ -20,13 +20,16 @@ export default function WaitlistForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.detail || "Inschrijving mislukt");
+      }
       setStatus("success");
       setMessage(data.message || "Aangemeld!");
       setEmail("");
-    } catch {
+    } catch (err) {
       setStatus("error");
-      setMessage("Er ging iets mis. Probeer het later opnieuw.");
+      setMessage(err instanceof Error ? err.message : "Er ging iets mis. Probeer het later opnieuw.");
     }
   }
 
