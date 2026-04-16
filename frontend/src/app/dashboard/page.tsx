@@ -34,12 +34,21 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("nl-NL", { day: "2-digit", month: "short" });
 }
 
+type Period = "month" | "quarter" | "ytd" | "all";
+const PERIOD_LABELS: Record<Period, string> = {
+  month: "Deze maand",
+  quarter: "Dit kwartaal",
+  ytd: "Dit jaar",
+  all: "Alles",
+};
+
 export default function Dashboard() {
   const router = useRouter();
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [period, setPeriod] = useState<Period>("quarter");
 
   useEffect(() => {
     if (!api.isLoggedIn()) {
@@ -50,7 +59,7 @@ export default function Dashboard() {
     async function fetchData() {
       try {
         const [dashData, txData] = await Promise.all([
-          api.getDashboard(),
+          api.getDashboard(period),
           api.getTransactions(10),
         ]);
         setDashboard(dashData);
@@ -63,7 +72,7 @@ export default function Dashboard() {
     }
 
     fetchData();
-  }, [router]);
+  }, [router, period]);
 
   return (
     <div className="min-h-screen bg-[#F5F3EF]">
@@ -72,7 +81,24 @@ export default function Dashboard() {
 
         {/* Main content */}
         <main className="flex-1 p-8">
-          <h1 className="text-2xl font-bold text-[#1A1A2E] mb-8">Dashboard</h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-2xl font-bold text-[#1A1A2E]">Dashboard</h1>
+            <div className="inline-flex rounded-lg border border-[#E0DCD5] bg-white overflow-hidden text-sm">
+              {(Object.keys(PERIOD_LABELS) as Period[]).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={`px-4 py-2 ${
+                    period === p
+                      ? "bg-[#0D9668] text-white"
+                      : "text-[#636E72] hover:bg-[#EDEAE4]"
+                  }`}
+                >
+                  {PERIOD_LABELS[p]}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {loading && (
             <div className="flex items-center justify-center h-64">

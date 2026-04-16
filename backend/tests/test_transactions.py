@@ -88,6 +88,32 @@ def test_delete_transaction_not_found(client):
     assert client.delete("/transactions/999").status_code == 404
 
 
+def test_dashboard_period_range_quarter():
+    from datetime import date
+    from app.routes.transactions import _period_range
+    # Mid-Q2 in a normal year.
+    start, end = _period_range("quarter", today=date(2026, 5, 10))
+    assert start == "2026-04-01"
+    assert end == "2026-07-01"
+
+
+def test_dashboard_period_range_month_year_rollover():
+    from datetime import date
+    from app.routes.transactions import _period_range
+    start, end = _period_range("month", today=date(2026, 12, 20))
+    assert start == "2026-12-01"
+    assert end == "2027-01-01"
+
+
+def test_dashboard_period_range_all():
+    from app.routes.transactions import _period_range
+    assert _period_range("all") == (None, None)
+
+
+def test_dashboard_bad_period(client):
+    assert client.get("/transactions/dashboard?period=nope").status_code == 400
+
+
 def test_dashboard_with_transactions(client, mock_db):
     seed_bank(mock_db)
     client.post("/transactions/", json={
@@ -99,7 +125,8 @@ def test_dashboard_with_transactions(client, mock_db):
         "amount": 242.0, "is_income": False, "btw_rate": "21",
     })
 
-    data = client.get("/transactions/dashboard").json()
+    # 'all' period: both transactions included.
+    data = client.get("/transactions/dashboard?period=all").json()
     assert data["transaction_count"] == 2
     assert data["total_income"] == 1210.0
     assert data["total_expenses"] == 242.0

@@ -162,9 +162,17 @@ class ApiClient {
   }
 
   // Dashboard
-  async getDashboard() {
-    if (this.demoMode) return { total_income: 14000, total_expenses: 650.49, btw_owed: 2441.25, profit: 13349.51, transaction_count: 12 };
-    return this.request<{ total_income: number; total_expenses: number; btw_owed: number; profit: number; transaction_count: number }>("/transactions/dashboard");
+  async getDashboard(period: "month" | "quarter" | "ytd" | "all" = "quarter") {
+    if (this.demoMode) {
+      const demo = {
+        month:   { total_income: 6450,  total_expenses: 199.99, btw_owed: 1083.77, profit: 6250.01,  transaction_count: 5 },
+        quarter: { total_income: 14000, total_expenses: 650.49, btw_owed: 2320.97, profit: 13349.51, transaction_count: 12 },
+        ytd:     { total_income: 14000, total_expenses: 650.49, btw_owed: 2320.97, profit: 13349.51, transaction_count: 12 },
+        all:     { total_income: 32200, total_expenses: 3800.49, btw_owed: 4920.80, profit: 28399.51, transaction_count: 27 },
+      };
+      return demo[period];
+    }
+    return this.request<{ total_income: number; total_expenses: number; btw_owed: number; profit: number; transaction_count: number }>(`/transactions/dashboard?period=${period}`);
   }
 
   // Transactions

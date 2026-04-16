@@ -1,3 +1,5 @@
+from datetime import date, datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.database import SupabaseClient, get_db
@@ -5,6 +7,33 @@ from app.schemas.transaction import TransactionCreate, TransactionUpdate, Transa
 from app.auth import get_current_user
 from app.classifier import classify_transaction
 from app.btw import canonical_btw_rate, summarise_transactions
+
+
+def _period_range(period: str, today: date | None = None) -> tuple[str | None, str | None]:
+    """Return (iso_start, iso_end_exclusive) for a named period, or (None, None)
+    for 'all'. `today` is injectable for deterministic tests."""
+    today = today or datetime.now(timezone.utc).date()
+    if period == "month":
+        start = today.replace(day=1)
+        if start.month == 12:
+            end = start.replace(year=start.year + 1, month=1)
+        else:
+            end = start.replace(month=start.month + 1)
+        return start.isoformat(), end.isoformat()
+    if period == "quarter":
+        q = (today.month - 1) // 3
+        start = today.replace(month=q * 3 + 1, day=1)
+        end_month = start.month + 3
+        if end_month > 12:
+            end = start.replace(year=start.year + 1, month=end_month - 12)
+        else:
+            end = start.replace(month=end_month)
+        return start.isoformat(), end.isoformat()
+    if period == "ytd":
+        return today.replace(month=1, day=1).isoformat(), today.replace(
+            year=today.year + 1, month=1, day=1,
+        ).isoformat()
+    return None, None
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -134,15 +163,26 @@ async def classify_all_transactions(
 
 @router.get("/dashboard", response_model=DashboardSummary)
 async def dashboard_summary(
+    period: str = "quarter",
     user: dict = Depends(get_current_user),
     db: SupabaseClient = Depends(get_db),
 ):
-    all_transactions = await _user_transactions(db, user["id"])
-    summary = summarise_transactions(all_transactions)
+    """Dashboard totals. `period` is one of month, quarter, ytd, all.
+
+    Defaults to 'quarter' because BTW aangifte is quarterly."""
+    if period not in ("month", "quarter", "ytd", "all"):
+        raise HTTPException(status_code=400, detail="invalid period")
+
+    txs = await _user_transactions(db, user["id"])
+    start, end = _period_range(period)
+    if start and end:
+        txs = [t for t in txs if (t.get("date") or "") >= start and (t.get("date") or "") < end]
+
+    summary = summarise_transactions(txs)
     return DashboardSummary(
         total_income=summary["total_income"],
         total_expenses=summary["total_expenses"],
         btw_owed=summary["btw_owed"],
         profit=summary["profit"],
-        transaction_count=len(all_transactions),
+        transaction_count=len(txs),
     )
