@@ -14,7 +14,8 @@ logger = logging.getLogger("klaarboek")
 
 app = FastAPI(
     title="KlaarBoek API",
-    description="Bookkeeping automation for Dutch ZZP'ers.",
+    description="Bookkeeping for Dutch ZZP'ers: CSV import, categorisation, "
+                "BTW reporting, invoices.",
     version="0.2.0",
 )
 

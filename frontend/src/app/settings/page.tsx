@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
+import { formatIban, isValidIban, normaliseIban } from "@/lib/iban";
 
 type BankConnection = {
   id: number;
@@ -166,9 +167,15 @@ export default function SettingsPage() {
 
   async function handleAddBank(e: React.FormEvent) {
     e.preventDefault();
+    const normalised = normaliseIban(iban);
+    if (!isValidIban(normalised)) {
+      setError("IBAN is niet geldig — controleer het nummer.");
+      return;
+    }
     setSubmitting(true);
+    setError(null);
     try {
-      await api.createBankConnection({ bank_name: bankName, iban: iban.toUpperCase().replace(/\s/g, "") });
+      await api.createBankConnection({ bank_name: bankName, iban: normalised });
       setBankName("");
       setIban("");
       setShowBankForm(false);
@@ -180,6 +187,11 @@ export default function SettingsPage() {
       setSubmitting(false);
     }
   }
+
+  const ibanNormalised = normaliseIban(iban);
+  const ibanShown = formatIban(iban);
+  const ibanState: "empty" | "ok" | "bad" =
+    !ibanNormalised ? "empty" : isValidIban(ibanNormalised) ? "ok" : "bad";
 
   async function handleDeleteBank(id: number) {
     try {
@@ -238,15 +250,29 @@ export default function SettingsPage() {
                       type="text"
                       required
                       placeholder="NL00 BANK 0000 0000 00"
-                      value={iban}
+                      value={ibanShown}
                       onChange={(e) => setIban(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-[#E0DCD5] text-sm text-[#1A1A2E] placeholder-[#636E72] focus:outline-none focus:border-[#0D9668]"
+                      autoCapitalize="characters"
+                      autoComplete="off"
+                      className={`w-full px-4 py-2 rounded-lg border text-sm text-[#1A1A2E] placeholder-[#636E72] font-mono focus:outline-none ${
+                        ibanState === "bad"
+                          ? "border-red-400 focus:border-red-500"
+                          : ibanState === "ok"
+                          ? "border-[#0D9668] focus:border-[#0D9668]"
+                          : "border-[#E0DCD5] focus:border-[#0D9668]"
+                      }`}
                     />
+                    {ibanState === "bad" && (
+                      <p className="text-xs text-red-500 mt-1">Geen geldig IBAN.</p>
+                    )}
+                    {ibanState === "ok" && (
+                      <p className="text-xs text-[#0D9668] mt-1">✓ geldig</p>
+                    )}
                   </div>
                 </div>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || ibanState !== "ok" || !bankName.trim()}
                   className="mt-4 px-6 py-2 bg-[#0D9668] text-white rounded-lg text-sm font-medium hover:bg-[#0B7D56] disabled:opacity-50"
                 >
                   {submitting ? "Toevoegen..." : "Toevoegen"}

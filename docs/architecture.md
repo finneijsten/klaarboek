@@ -37,10 +37,9 @@
 - Automatic daily transaction sync
 
 ### 2. Transaction Classification
-- AI-powered categorization (business vs. personal)
-- Expense type detection (travel, office, equipment, etc.)
-- BTW rate assignment (21%, 9%, 0%, exempt)
-- User corrections feed back into the model
+- Keyword-based rules for category + BTW rate + business/private (see `app/classifier.py`)
+- Users can override any field; corrections persist on the row
+- Open path to a learned model later once there is enough user-correction data
 
 ### 3. BTW Engine
 - Automatic quarterly BTW calculation
@@ -86,7 +85,7 @@ User
 ## MVP Scope (v1)
 
 1. Bank connection + transaction import
-2. Manual + AI-assisted transaction classification
+2. Manual + rule-based transaction classification
 3. BTW calculation + export
 4. Basic dashboard
 

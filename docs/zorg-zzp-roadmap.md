@@ -132,7 +132,7 @@
 
 - [ ] CSV-upload van bankafschriften (ING, Rabo, ABN, Bunq, Knab, Revolut) — **geen** Nordigen PSD2 in V1
 - [ ] Parse + dedupe op external_id
-- [ ] Auto-categorisatie (bestaande AI) + handmatige override
+- [ ] Auto-categorisatie (bestaande regels) + handmatige override
 - [ ] Noteer als tech-debt: Nordigen later (Fase 4)
 
 ### 2.4 BTW-rapport

@@ -29,11 +29,11 @@
 
 | Feature | Moneybird | e-Boekhouden | Informer | KlaarBoek |
 |---|---|---|---|---|
-| Auto-categorization | 80-90% | Limited | Limited | 95%+ (AI-first) |
-| BTW-aangifte | Export only | Export only | Export only | Built-in filing |
-| Bank sync (PSD2) | Yes | Yes | Yes | Yes |
+| Auto-categorization | 80-90% | Limited | Limited | Rule-based, user-tunable |
+| BTW-aangifte | Export only | Export only | Export only | Quarterly report (filing on roadmap) |
+| Bank sync | PSD2 | PSD2 | PSD2 | CSV upload (PSD2 later) |
 | Pricing | €14-33/mo | ~€15/mo | Varies | €9.99/mo |
-| ML-powered | Bolted-on | No | No | Core architecture |
+| Dutch-first | Yes | Yes | Yes | Yes |
 | Setup complexity | Medium | Low | High | Low |
 
 ## Market Opportunity
@@ -45,11 +45,11 @@
 
 ## KlaarBoek Positioning
 
-**"The bookkeeper that works while you sleep."**
+**"Boekhouding die gewoon werkt."**
 
 - One plan: €9.99/month — undercut the market
-- AI-first: 95%+ automatic transaction classification
-- End-to-end: from bank sync to BTW filing, zero manual steps
+- Automatic categorization with transparent rules — you stay in control
+- Bank CSV → categorised → quarterly BTW report, ready to file
 - Dutch-first: built specifically for the Dutch tax system
 
 ## Sources
