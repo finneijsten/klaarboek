@@ -40,6 +40,22 @@ def test_list_delete_bank_connection(client, mock_db):
     assert client.get("/banks/").json() == []
 
 
+def test_delete_bank_connection_cascades_transactions(client, mock_db):
+    client.post("/banks/", json={"bank_name": "ING", "iban": "NL91ABNA0417164300"})
+    conn_id = client.get("/banks/").json()[0]["id"]
+    client.post("/transactions/", json={
+        "bank_connection_id": conn_id,
+        "date": "2026-02-15T00:00:00",
+        "amount": 100.0,
+        "is_income": False,
+    })
+    assert len(client.get("/transactions/").json()) == 1
+
+    assert client.delete(f"/banks/{conn_id}").status_code == 204
+    # Orphan transactions must be gone, not lingering on the dashboard.
+    assert client.get("/transactions/").json() == []
+
+
 # --- CSV parsing -----------------------------------------------------------
 
 ING_CSV = """\

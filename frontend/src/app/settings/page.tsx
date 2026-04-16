@@ -357,6 +357,30 @@ export default function SettingsPage() {
               Data exporteren (ZIP)
             </button>
           </div>
+
+          {/* Danger zone */}
+          <div className="bg-white rounded-2xl border border-red-200 p-6 mt-8">
+            <h2 className="text-lg font-bold text-red-600 mb-2">Gevarenzone</h2>
+            <p className="text-sm text-[#636E72] mb-4">
+              Account verwijderen wist al je data definitief: transacties,
+              facturen, BTW-aangiftes en bankrekeningen. Exporteer je data
+              eerst als je die wilt bewaren.
+            </p>
+            <button
+              onClick={async () => {
+                if (!confirm("Weet je het zeker? Je account en alle data worden definitief verwijderd.")) return;
+                try {
+                  await api.deleteAccount();
+                  router.push("/");
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Verwijderen mislukt");
+                }
+              }}
+              className="px-6 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700"
+            >
+              Account definitief verwijderen
+            </button>
+          </div>
         </main>
       </div>
     </div>

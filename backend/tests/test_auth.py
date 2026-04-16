@@ -70,3 +70,22 @@ def test_root(client):
     res = client.get("/")
     assert res.status_code == 200
     assert "KlaarBoek" in res.json()["message"]
+
+
+def test_delete_account_removes_all_user_data(client, mock_db):
+    from tests.conftest import seed_bank
+    seed_bank(mock_db)
+    client.post("/transactions/", json={
+        "bank_connection_id": 1, "date": "2026-02-15T00:00:00",
+        "amount": 100.0, "is_income": False,
+    })
+    client.post("/invoices/", json={
+        "client_name": "A", "amount_excl_btw": 100, "btw_rate": 21.0,
+    })
+
+    assert client.delete("/auth/me").status_code == 204
+
+    assert mock_db._tables.get("transactions", []) == []
+    assert mock_db._tables.get("bank_connections", []) == []
+    assert mock_db._tables.get("invoices", []) == []
+    assert mock_db._tables.get("users", []) == []

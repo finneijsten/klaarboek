@@ -241,6 +241,21 @@ class ApiClient {
     return this.request(`/banks/${id}`, { method: "DELETE" });
   }
 
+  async deleteAccount() {
+    if (this.demoMode) {
+      alert("Account verwijderen is niet beschikbaar in demo modus");
+      return;
+    }
+    const headers: Record<string, string> = {};
+    if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
+    const res = await fetch(`${API_BASE}/auth/me`, { method: "DELETE", headers });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Verwijderen mislukt" }));
+      throw new Error(err.detail || "Verwijderen mislukt");
+    }
+    this.clearToken();
+  }
+
   async exportData() {
     if (this.demoMode) {
       alert("Data-export is niet beschikbaar in demo modus");

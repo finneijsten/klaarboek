@@ -56,6 +56,10 @@ async def delete_bank_connection(
     if not existing:
         raise HTTPException(status_code=404, detail="Bankverbinding niet gevonden")
 
+    # Defensive cascade: the SQL schema uses ON DELETE CASCADE, but older
+    # Supabase instances may have been created without it. Delete dependent
+    # transactions first so the UI never shows orphans.
+    await db.delete("transactions", {"bank_connection_id": connection_id})
     await db.delete("bank_connections", {"id": connection_id, "user_id": user["id"]})
 
 

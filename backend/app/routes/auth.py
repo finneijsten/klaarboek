@@ -72,3 +72,24 @@ async def export_my_data(
         media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@router.delete("/me", status_code=204)
+async def delete_my_account(
+    user: dict = Depends(get_current_user),
+    db: SupabaseClient = Depends(get_db),
+):
+    """Permanently delete the authenticated user and all their data (GDPR)."""
+    user_id = user["id"]
+
+    # Fetch dependent keys first so we can walk the graph even if the DB lacks
+    # ON DELETE CASCADE.
+    connections = await db.select("bank_connections", columns="id",
+                                  filters={"user_id": user_id})
+    for conn in connections:
+        await db.delete("transactions", {"bank_connection_id": conn["id"]})
+
+    await db.delete("bank_connections", {"user_id": user_id})
+    await db.delete("invoices", {"user_id": user_id})
+    await db.delete("btw_declarations", {"user_id": user_id})
+    await db.delete("users", {"id": user_id})
