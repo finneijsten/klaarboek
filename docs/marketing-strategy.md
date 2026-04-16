@@ -179,13 +179,13 @@ These should be the primary focus before spending on paid:
 
 ## Competitive Positioning
 
-**Tagline:** "De boekhouder die werkt terwijl jij slaapt."
+**Tagline:** "Boekhouding die gewoon werkt."
 
 **Key messages:**
-1. "95% automatisch — jij doet de laatste 5%"
+1. "Bankafschrift uploaden, KlaarBoek sorteert het"
 2. "€9,99/maand — goedkoper dan elke concurrent"
-3. "BTW-aangifte op autopilot — nooit meer stress voor de deadline"
-4. "Van bankafschrift naar belastingaangifte — zonder boekhouder"
+3. "BTW-rapport per kwartaal, klaar om zelf in te dienen"
+4. "Jij houdt de regie — elke categorie is aanpasbaar"
 
 ## Sources
 

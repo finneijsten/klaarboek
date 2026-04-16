@@ -13,8 +13,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KlaarBoek — Eenvoudige boekhouding voor ZZP'ers",
-  description: "Bookkeeping voor Nederlandse ZZP'ers: CSV bank-import, automatische categorisatie, BTW-rapport per kwartaal en facturen.",
+  title: "KlaarBoek — Boekhouding die gewoon werkt voor ZZP'ers",
+  description:
+    "Bookkeeping voor Nederlandse ZZP'ers: upload je bankafschrift, KlaarBoek sorteert het in de juiste categorieën en BTW-tarieven. €9,99 per maand.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+  },
+  openGraph: {
+    title: "KlaarBoek — Boekhouding die gewoon werkt",
+    description:
+      "Voor Nederlandse ZZP'ers: bank-CSV → gesorteerd → BTW-rapport per kwartaal. €9,99 per maand.",
+    url: "https://klaarboek.vercel.app",
+    siteName: "KlaarBoek",
+    images: [{ url: "/og.svg", width: 1200, height: 630, alt: "KlaarBoek" }],
+    locale: "nl_NL",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KlaarBoek — Boekhouding die gewoon werkt",
+    description:
+      "Voor Nederlandse ZZP'ers. €9,99/mnd. Bank-CSV → gesorteerd → BTW-rapport.",
+    images: ["/og.svg"],
+  },
 };
 
 export default function RootLayout({

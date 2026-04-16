@@ -6,7 +6,7 @@
 **Priority: CRITICAL — Core value prop**
 - Connect to bank API via Nordigen/GoCardless (PSD2)
 - Parse and import transactions automatically
-- AI-powered classification (business vs. personal, expense types)
+- Keyword-based classification (business vs. personal, expense types)
 - BTW rate assignment per transaction
 - User corrections feed back into the model
 

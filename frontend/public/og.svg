@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#F5F3EF"/>
+  <rect x="0" y="0" width="1200" height="2" fill="#1A1A2E"/>
+  <rect x="0" y="628" width="1200" height="2" fill="#1A1A2E"/>
+  <g font-family="'Geist', system-ui, -apple-system, sans-serif">
+    <text x="80" y="100" font-size="22" font-weight="700" fill="#1A1A2E" letter-spacing="4">KLAARBOEK</text>
+    <text x="80" y="135" font-size="14" font-weight="400" fill="#B5651D" letter-spacing="3" font-family="ui-monospace, monospace">BOEKHOUDING VOOR ZZP</text>
+
+    <text x="80" y="300" font-size="100" font-weight="700" fill="#1A1A2E">Boekhouding,</text>
+    <text x="80" y="410" font-size="100" font-weight="700" fill="#0D9668">zonder poeha.</text>
+
+    <text x="80" y="500" font-size="28" fill="#636E72">€9,99 per maand · geen pakketten · geen verrassingen</text>
+  </g>
+</svg>

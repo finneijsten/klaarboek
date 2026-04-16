@@ -239,9 +239,21 @@ export default function InvoicesPage() {
               {/* Invoice table */}
               <div className="bg-white rounded-2xl border border-[#E0DCD5] p-6">
                 {invoices.length === 0 ? (
-                  <p className="text-sm text-[#636E72] py-8 text-center">
-                    Nog geen facturen. Maak je eerste factuur aan.
-                  </p>
+                  <div className="py-10 text-center">
+                    <p className="text-sm font-medium text-[#1A1A2E] mb-2">
+                      Nog geen facturen.
+                    </p>
+                    <p className="text-sm text-[#636E72] mb-4 max-w-md mx-auto">
+                      Maak je eerste factuur in twee klikken — KlaarBoek nummert
+                      hem, berekent de BTW en levert een PDF op.
+                    </p>
+                    <button
+                      onClick={() => setShowForm(true)}
+                      className="px-4 py-2 bg-[#0D9668] text-white rounded-lg text-sm font-medium hover:bg-[#0B7D56]"
+                    >
+                      + Eerste factuur aanmaken
+                    </button>
+                  </div>
                 ) : (
                   <table className="w-full">
                     <thead>

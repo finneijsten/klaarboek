@@ -193,9 +193,16 @@ export default function BTWPage() {
               <div className="bg-white rounded-2xl border border-[#E0DCD5] p-6">
                 <h2 className="text-lg font-bold text-[#1A1A2E] mb-4">Eerdere aangiftes</h2>
                 {declarations.length === 0 ? (
-                  <p className="text-sm text-[#636E72] py-8 text-center">
-                    Nog geen aangiftes opgeslagen.
-                  </p>
+                  <div className="py-8 text-center">
+                    <p className="text-sm font-medium text-[#1A1A2E] mb-1">
+                      Nog geen aangiftes opgeslagen.
+                    </p>
+                    <p className="text-sm text-[#636E72] max-w-md mx-auto">
+                      Bereken hierboven een kwartaal en sla het op als concept.
+                      KlaarBoek bewaart je cijfers zodat je ze kan terugvinden
+                      voor je belastingaangifte.
+                    </p>
+                  </div>
                 ) : (
                   <table className="w-full">
                     <thead>
