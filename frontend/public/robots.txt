@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /zorg
+
+# Authenticated app routes — no value indexing these
+Disallow: /dashboard
+Disallow: /transactions
+Disallow: /invoices
+Disallow: /btw
+Disallow: /settings
+
+Sitemap: https://klaarboek.vercel.app/sitemap.xml
