@@ -67,7 +67,7 @@ export default function ZorgLanding() {
       <section className="px-6 md:px-12 py-20 border-b border-[#1A1A2E]/10">
         <div className="max-w-5xl mx-auto">
           <p className="text-xs font-mono tracking-[0.2em] uppercase text-[#B5651D] mb-6">
-            Wat we horen van fysio&apos;s
+            Specifiek voor fysio-ZZP
           </p>
           <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-14 max-w-3xl">
             Vier dingen waar Moneybird je niet mee helpt.
@@ -104,6 +104,83 @@ export default function ZorgLanding() {
         </div>
       </section>
 
+      {/* Comparison table */}
+      <section className="px-6 md:px-12 py-20 border-b border-[#1A1A2E]/10">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-xs font-mono tracking-[0.2em] uppercase text-[#B5651D] mb-6">
+            Vergelijking
+          </p>
+          <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-14 max-w-3xl">
+            Waarom niet Moneybird of e-Boekhouden?
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b-2 border-[#1A1A2E]">
+                  <th className="text-left py-4 pr-8 font-mono text-xs uppercase tracking-widest text-[#636E72] w-1/2">
+                    Functie
+                  </th>
+                  <th className="py-4 px-6 text-center">
+                    <span className="font-bold text-base">KlaarBoek</span>
+                    <span className="block text-xs font-mono text-[#B5651D]">fysio-versie</span>
+                  </th>
+                  <th className="py-4 px-4 text-center font-mono text-xs text-[#636E72] uppercase tracking-widest">
+                    Moneybird
+                  </th>
+                  <th className="py-4 px-4 text-center font-mono text-xs text-[#636E72] uppercase tracking-widest">
+                    e-Boekhouden
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["BTW-vrijstelling zorgdiensten automatisch", "✓", "✗", "✗"],
+                  ["BTW-split: vrij/belast in één kwartaalrapport", "✓", "✗", "✗"],
+                  ["AGB-code en BIG-nummer op factuur", "✓", "✗", "✗"],
+                  ["Declaratie-overzicht per zorgverzekeraar", "bouwt", "✗", "✗"],
+                  ["Kwartaal BTW-rapport", "✓", "✓", "✓"],
+                  ["Facturen met PDF-download", "✓", "✓", "✓"],
+                  ["Bank-CSV importeren", "✓", "✓", "✓"],
+                  ["Prijs per maand", "€9,99", "€19+", "€12+"],
+                ].map(([feat, kb, mb, eb]) => (
+                  <tr key={feat} className="border-b border-[#1A1A2E]/10">
+                    <td className="py-4 pr-8 text-[#1A1A2E] leading-snug">{feat}</td>
+                    <td
+                      className={`py-4 px-6 text-center font-semibold ${
+                        kb === "✓"
+                          ? "text-[#0D9668]"
+                          : kb === "✗"
+                          ? "text-red-400"
+                          : "text-[#B5651D]"
+                      }`}
+                    >
+                      {kb}
+                    </td>
+                    <td
+                      className={`py-4 px-4 text-center ${
+                        mb === "✓" ? "text-[#636E72]" : "text-[#B2BEC3]"
+                      }`}
+                    >
+                      {mb}
+                    </td>
+                    <td
+                      className={`py-4 px-4 text-center ${
+                        eb === "✓" ? "text-[#636E72]" : "text-[#B2BEC3]"
+                      }`}
+                    >
+                      {eb}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs font-mono text-[#B2BEC3] mt-6">
+            Declaratie-overzicht per verzekeraar is in aanbouw — beschikbaar na validatiefase.
+          </p>
+        </div>
+      </section>
+
       {/* Honest about phase */}
       <section className="bg-[#1A1A2E] text-[#F5F3EF] px-6 md:px-12 py-20">
         <div className="max-w-4xl mx-auto">
@@ -127,7 +204,7 @@ export default function ZorgLanding() {
               De <span className="text-[#F5F3EF]">fysio-specifieke dingen</span> hierboven —
               BTW-vrijstelling automatisch, AGB-veld, declaratie-dashboard — komen erbij
               nadat we met genoeg fysiotherapeuten hebben gesproken om het goed te doen.
-              Dat duurt 2-3 maanden.
+              Dat duurt 2–3 maanden.
             </p>
             <p className="text-[#F5F3EF] font-medium">
               Laat je e-mail achter als je hier vroeg in wil. Als je liever meewerkt en
@@ -209,10 +286,11 @@ function ZorgWaitlistForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="text-xs font-mono uppercase tracking-wider text-[#636E72] mb-2 block">
+        <label htmlFor="zorg-email" className="text-xs font-mono uppercase tracking-wider text-[#636E72] mb-2 block">
           E-mail
         </label>
         <input
+          id="zorg-email"
           type="email"
           required
           placeholder="jouw@praktijk.nl"
