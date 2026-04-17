@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 
 from app.database import SupabaseClient, get_db
@@ -9,6 +11,7 @@ from app.csv_import import parse_csv, dedupe
 from app.iban import normalise_iban
 
 router = APIRouter(prefix="/banks", tags=["banks"])
+logger = logging.getLogger("klaarboek.banks")
 
 
 @router.get("/", response_model=list[BankConnectionResponse])
@@ -105,8 +108,12 @@ async def import_csv(
 
     imported = 0
     for row in rows:
-        classification = classify_transaction(row.get("description"), row.get("counterparty"))
-        classification["btw_rate"] = canonical_btw_rate(classification.get("btw_rate"))
+        try:
+            classification = classify_transaction(row.get("description"), row.get("counterparty"))
+            classification["btw_rate"] = canonical_btw_rate(classification.get("btw_rate"))
+        except Exception:
+            logger.warning("classify_transaction failed for row; using defaults")
+            classification = {"category": "Overig", "btw_rate": "21%", "classified_by": "manual", "is_business": True}
         await db.insert("transactions", {
             "bank_connection_id": connection_id,
             "external_id": row.get("external_id"),
@@ -248,8 +255,12 @@ async def sync_transactions(
         counterparty = tx.get("creditorName") or tx.get("debtorName") or ""
         date = tx.get("bookingDate") or tx.get("valueDate", "")
 
-        classification = classify_transaction(description, counterparty)
-        classification["btw_rate"] = canonical_btw_rate(classification.get("btw_rate"))
+        try:
+            classification = classify_transaction(description, counterparty)
+            classification["btw_rate"] = canonical_btw_rate(classification.get("btw_rate"))
+        except Exception:
+            logger.warning("classify_transaction failed during sync; using defaults")
+            classification = {"category": "Overig", "btw_rate": "21%", "classified_by": "manual", "is_business": True}
 
         await db.insert("transactions", {
             "bank_connection_id": connection_id,
