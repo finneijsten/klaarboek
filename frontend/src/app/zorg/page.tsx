@@ -286,10 +286,11 @@ function ZorgWaitlistForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="text-xs font-mono uppercase tracking-wider text-[#636E72] mb-2 block">
+        <label htmlFor="zorg-email" className="text-xs font-mono uppercase tracking-wider text-[#636E72] mb-2 block">
           E-mail
         </label>
         <input
+          id="zorg-email"
           type="email"
           required
           placeholder="jouw@praktijk.nl"
