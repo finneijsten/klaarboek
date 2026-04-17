@@ -6,12 +6,20 @@ export default function Home() {
       {/* Top bar */}
       <nav className="flex items-center justify-between px-6 md:px-12 py-5 border-b border-[#1A1A2E]/10">
         <div className="flex items-baseline gap-3">
-          <span className="text-sm font-bold tracking-[0.22em]">KLAARBOEK</span>
+          <Link href="/" className="text-sm font-bold tracking-[0.22em]">
+            KLAARBOEK
+          </Link>
           <span className="hidden sm:inline text-xs font-mono text-[#636E72]">
             est. 2026 · nederland
           </span>
         </div>
-        <div className="flex items-center gap-6 text-sm">
+        <div className="flex items-center gap-5 md:gap-8 text-sm">
+          <Link
+            href="/zorg"
+            className="hidden sm:inline text-[#B5651D] underline underline-offset-4 decoration-dotted hover:text-[#0D9668]"
+          >
+            Werk je in de zorg?
+          </Link>
           <Link href="/login" className="hover:text-[#0D9668]">
             Inloggen
           </Link>
@@ -24,35 +32,35 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero — split layout, receipt on right as a visual anchor */}
+      {/* Hero — concrete pain framing */}
       <section className="px-6 md:px-12 py-16 md:py-24 border-b border-[#1A1A2E]/10">
         <div className="grid lg:grid-cols-[1.2fr_1fr] gap-12 lg:gap-20 items-center max-w-7xl mx-auto">
           <div>
             <p className="text-xs font-mono tracking-[0.2em] uppercase text-[#B5651D] mb-8">
-              ✺ Boekhouding · ZZP · sinds 2026
+              ✺ Voor Nederlandse ZZP&apos;ers
             </p>
-            <h1 className="text-[clamp(2.75rem,7vw,5.5rem)] font-bold leading-[0.95] tracking-tight mb-8">
-              De boekhouder
-              <br />
-              die niet zegt
+            <h1 className="text-[clamp(2.5rem,6.5vw,5rem)] font-bold leading-[0.98] tracking-tight mb-8">
+              Je BTW-aangifte
               <br />
               <span className="relative inline-block">
-                <span className="relative z-10 text-[#F5F3EF] px-3">&ldquo;ik bel je terug&rdquo;</span>
+                <span className="relative z-10 text-[#F5F3EF] px-3">zonder de paniek</span>
                 <span className="absolute inset-0 bg-[#0D9668] -rotate-1" aria-hidden />
               </span>
-              .
+              <br />
+              van kwartaal-week.
             </h1>
             <p className="text-lg text-[#636E72] max-w-xl leading-relaxed mb-10">
-              Upload je bankafschrift, KlaarBoek sorteert het, en je
-              kwartaalrapport staat klaar. Geen pakketten, geen upsells.
-              €9,99 per maand.
+              KlaarBoek is boekhoud-software voor ZZP&apos;ers die geen boekhouder willen maar
+              ook geen uur per week kwijt willen zijn aan Excel. Upload je bankafschrift,
+              alles wordt gecategoriseerd, en je kwartaalrapport staat klaar.{" "}
+              <span className="text-[#1A1A2E] font-medium">€9,99 per maand.</span>
             </p>
             <div className="flex flex-wrap items-center gap-5">
               <Link
                 href="/register"
                 className="px-6 py-3 bg-[#0D9668] text-white font-medium hover:bg-[#0A7B55]"
               >
-                Account aanmaken
+                Probeer gratis
               </Link>
               <Link
                 href="/login"
@@ -62,89 +70,141 @@ export default function Home() {
               </Link>
             </div>
             <p className="mt-5 text-xs font-mono text-[#B2BEC3]">
-              gratis tijdens de beta · geen creditcard · exporteer je data als ZIP
+              gratis tijdens de beta · geen creditcard · data altijd exporteerbaar
             </p>
           </div>
 
-          {/* Fake receipt — the visual weight on the right */}
           <Receipt />
         </div>
       </section>
 
-      {/* Dark band — 'wat het níét is' */}
-      <section className="bg-[#1A1A2E] text-[#F5F3EF] px-6 md:px-12 py-20">
-        <div className="max-w-5xl mx-auto text-center">
+      {/* Pain — what people are doing now */}
+      <section className="px-6 md:px-12 py-20 border-b border-[#1A1A2E]/10">
+        <div className="max-w-5xl mx-auto">
           <p className="text-xs font-mono tracking-[0.2em] uppercase text-[#B5651D] mb-6">
-            Waarom anders
+            Nu
           </p>
-          <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-14">
-            Wat KlaarBoek <span className="italic font-serif text-[#0D9668]">niet</span> is.
+          <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-14 max-w-3xl">
+            Drie manieren waarop je het nu waarschijnlijk doet.
           </h2>
-          <div className="grid md:grid-cols-3 gap-10 md:gap-6 text-left">
+          <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                title: "Geen AI-praatjes",
+                tag: "Optie A · Excel",
+                title: "Je doet het zelf in een spreadsheet.",
                 body:
-                  "Regel-gebaseerde categorisatie die je kan inzien én aanpassen. Geen zwarte doos, geen 'vertrouw ons maar'. Jij ziet waarom een transactie in een categorie valt.",
+                  "Elke maand bonnetjes verzamelen. De week voor de BTW-deadline nog uitzoeken of die lunch nou zakelijk was. Hopen dat je geen transactie bent vergeten.",
+                cost: "~2 uur per maand · gratis",
               },
               {
-                title: "Geen jaarcontract",
+                tag: "Optie B · Boekhouder",
+                title: "Je betaalt iemand om het te doen.",
                 body:
-                  "Maandelijks opzegbaar. Exporteer je data als ZIP als je weggaat. Je gegevens zijn van jou, altijd.",
+                  "€60-150 per uur. Je stuurt bonnetjes en afschriften, de boekhouder doet de rest — maar je hebt zelf geen inzicht en de rekening komt pas achteraf.",
+                cost: "€600-2.000 per jaar",
               },
               {
-                title: "Geen boekhouder-uurtarief",
+                tag: "Optie C · Moneybird",
+                title: "Je gebruikt een pakket van €20+ per maand.",
                 body:
-                  "€9,99 per maand voor alles. Geen 'we sturen je de factuur', geen wachten op een belafspraak. Zelf doen, wel goed.",
+                  "Automatische bank-sync, maar 80-90% van transacties blijft handmatig corrigeren. Vaak meer features dan je nodig hebt als ZZP&apos;er met 20 transacties per maand.",
+                cost: "€170-400 per jaar",
               },
             ].map((c) => (
-              <div key={c.title} className="border-t border-[#F5F3EF]/20 pt-6">
-                <h3 className="text-xl font-bold mb-3">{c.title}</h3>
-                <p className="text-[#B2BEC3] leading-relaxed text-sm">{c.body}</p>
+              <div key={c.tag} className="bg-white border border-[#1A1A2E]/10 p-6">
+                <p className="text-xs font-mono uppercase tracking-wider text-[#636E72] mb-4">
+                  {c.tag}
+                </p>
+                <h3 className="text-xl font-bold mb-3 leading-tight">{c.title}</h3>
+                <p className="text-[#636E72] text-sm leading-relaxed mb-4">{c.body}</p>
+                <p className="text-xs font-mono text-[#B5651D]">{c.cost}</p>
               </div>
             ))}
           </div>
+          <p className="mt-10 text-lg text-[#1A1A2E] font-medium">
+            KlaarBoek zit ertussenin: je doet het zelf, maar het saaie werk is weg.
+            <span className="text-[#636E72] font-normal">
+              {" "}€9,99 per maand. 5 minuten per kwartaal.
+            </span>
+          </p>
         </div>
       </section>
 
-      {/* Process — horizontal */}
-      <section className="px-6 md:px-12 py-20 border-b border-[#1A1A2E]/10">
+      {/* What KlaarBoek actually does */}
+      <section className="bg-[#1A1A2E] text-[#F5F3EF] px-6 md:px-12 py-20">
         <div className="max-w-5xl mx-auto">
           <p className="text-xs font-mono tracking-[0.2em] uppercase text-[#B5651D] mb-6 text-center">
-            In drie stappen
+            Wat KlaarBoek doet
           </p>
-          <h2 className="text-3xl md:text-4xl font-bold mb-14 text-center">
-            Van bankafschrift naar BTW-rapport.
+          <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-14 text-center max-w-3xl mx-auto">
+            Bankafschrift erin, kwartaalrapport eruit.
           </h2>
           <div className="grid md:grid-cols-3 gap-10 md:gap-12">
             {[
               {
                 n: "01",
-                title: "Importeer",
+                title: "Je uploadt je bankafschrift",
                 body:
-                  "CSV van ING, Rabobank, ABN AMRO, Bunq, Knab of Revolut. Hele maand, of een heel jaar — net wat jij wilt.",
+                  "CSV-export van ING, Rabobank, ABN AMRO, Bunq, Knab of Revolut. De hele maand in één keer. Geen tussenpartij die in je rekening kan kijken.",
               },
               {
                 n: "02",
-                title: "Sorteer",
+                title: "KlaarBoek categoriseert",
                 body:
-                  "Categorieën en BTW-tarieven worden automatisch toegekend. Klopt iets niet? Eén klik en het is aangepast.",
+                  "Elke transactie krijgt een categorie, BTW-tarief en zakelijk/privé-vlag. Regel-gebaseerd en inzichtelijk — je ziet waarom, je kan het overschrijven.",
               },
               {
                 n: "03",
-                title: "Rapport",
+                title: "Kwartaal-BTW-rapport klaar",
                 body:
-                  "Aan het einde van het kwartaal zie je precies wat je moet betalen of terugkrijgt. Filing doe je zelf.",
+                  "Aan het einde van het kwartaal druk je op 'bereken'. Je ziet het bedrag dat je moet betalen of terugkrijgt, plus het overzicht dat je nodig hebt voor belastingdienst.nl.",
               },
             ].map((step) => (
-              <div key={step.n} className="border-t-2 border-[#1A1A2E] pt-6">
+              <div key={step.n} className="border-t-2 border-[#F5F3EF]/30 pt-6">
                 <div className="flex items-baseline gap-3 mb-3">
                   <span className="text-sm font-mono text-[#B5651D]">{step.n}</span>
                   <h3 className="text-2xl font-bold">{step.title}</h3>
                 </div>
-                <p className="text-[#636E72] leading-relaxed">{step.body}</p>
+                <p className="text-[#B2BEC3] leading-relaxed">{step.body}</p>
               </div>
             ))}
+          </div>
+          <p className="text-center text-[#B2BEC3] mt-14 text-sm">
+            + facturen aanmaken, BTW erop,{" "}
+            <span className="text-[#F5F3EF]">PDF-download</span>. Inkomsten en uitgaven in
+            een duidelijk dashboard. Data altijd exporteerbaar als ZIP.
+          </p>
+        </div>
+      </section>
+
+      {/* Who it's for / not for */}
+      <section className="px-6 md:px-12 py-20 border-b border-[#1A1A2E]/10">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
+          <div className="border border-[#0D9668] bg-white p-8">
+            <p className="text-xs font-mono uppercase tracking-wider text-[#0D9668] mb-4">
+              ✓ Voor jou
+            </p>
+            <h3 className="text-2xl font-bold mb-4">Als je ZZP&apos;er bent met…</h3>
+            <ul className="space-y-2 text-[#636E72]">
+              <li>· eenmanszaak of BV, geen personeel</li>
+              <li>· minder dan ~100 transacties per maand</li>
+              <li>· 1 of 2 bankrekeningen</li>
+              <li>· gewone BTW-situatie (21% / 9% / 0% / vrijgesteld)</li>
+              <li>· geen behoefte aan een boekhouder die belt</li>
+            </ul>
+          </div>
+          <div className="border border-[#1A1A2E]/20 bg-[#EDE9E3] p-8">
+            <p className="text-xs font-mono uppercase tracking-wider text-[#636E72] mb-4">
+              ✕ Niet voor jou
+            </p>
+            <h3 className="text-2xl font-bold mb-4">KlaarBoek is niet geschikt als je…</h3>
+            <ul className="space-y-2 text-[#636E72]">
+              <li>· personeel in dienst hebt (salarisadministratie)</li>
+              <li>· met meerdere BV&apos;s werkt (geconsolideerd)</li>
+              <li>· buitenlandse BTW (ICP/OSS) doet</li>
+              <li>· iemand anders de aangifte voor je wil laten doen</li>
+              <li>· voorraadadministratie nodig hebt</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -174,7 +234,7 @@ export default function Home() {
                   ["Bank-import", "CSV upload", "PSD2 sync", "— (jij stuurt)"],
                   ["Auto-categorisatie", "transparante regels", "80–90%", "zij doen het"],
                   ["BTW-rapport", "per kwartaal", "export", "zij doen het"],
-                  ["BTW-filing?", "nee, jij houdt regie", "nee", "ja"],
+                  ["BTW-filing doen wij?", "nee, jij houdt regie", "nee", "ja"],
                   ["Setup", "< 5 minuten", "medium", "afspraak inplannen"],
                 ].map((row) => (
                   <tr key={row[0]}>
@@ -190,7 +250,57 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Closing CTA — centered */}
+      {/* FAQ */}
+      <section className="px-6 md:px-12 py-20 border-b border-[#1A1A2E]/10">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-xs font-mono tracking-[0.2em] uppercase text-[#B5651D] mb-6">
+            Veelgestelde vragen
+          </p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-10">
+            Dingen die mensen ons sturen.
+          </h2>
+          <dl className="divide-y divide-[#1A1A2E]/10 border-t border-b border-[#1A1A2E]/10">
+            {[
+              {
+                q: "Dient KlaarBoek mijn BTW-aangifte voor me in bij de Belastingdienst?",
+                a: "Nee. Wij leveren het rapport met alle cijfers; jij logt in op belastingdienst.nl en vult de velden over. Dat duurt ongeveer 5 minuten. Directe filing via SBR/Digipoort staat op de roadmap maar is niet klaar.",
+              },
+              {
+                q: "Kan ik mijn bank koppelen zoals bij Moneybird?",
+                a: "Op dit moment werken we met CSV-upload. Die CSV haal je zo uit je internetbankieren. Dat voelt ouderwets maar heeft voordelen: geen tussenpartij, geen toestemmingen die elke 90 dagen verlopen, en je kiest zelf welke maand je uploadt. PSD2 bank-sync komt later.",
+              },
+              {
+                q: "Wat als KlaarBoek een transactie fout categoriseert?",
+                a: "Eén klik om aan te passen. Je correctie blijft staan, en in de toekomst leren de regels zelf van jouw patronen. De categorisatie is transparant — je kan de regels zien, niet 'de AI denkt'.",
+              },
+              {
+                q: "Ik heb al een boekhouder. Waarom zou ik overstappen?",
+                a: "Misschien moet je dat niet. KlaarBoek is voor mensen die hun administratie simpel genoeg vinden om zelf te doen, maar geen zin hebben in het handwerk. Heb je personeel of complexe BTW? Blijf bij de boekhouder.",
+              },
+              {
+                q: "Is mijn data veilig?",
+                a: "Data staat bij Supabase (EU-servers), wachtwoorden zijn bcrypt-gehashed, toegang verloopt via JWT. Je kan je data altijd als ZIP exporteren, en je account definitief verwijderen (dan is alles weg).",
+              },
+              {
+                q: "Wat kost het echt?",
+                a: "€9,99 per maand, maandelijks opzegbaar. Tijdens de beta gratis. Geen setup-fee, geen verborgen kosten, geen 'plus-pakket'.",
+              },
+            ].map((item) => (
+              <details key={item.q} className="group py-5">
+                <summary className="flex items-center justify-between cursor-pointer list-none">
+                  <span className="font-medium pr-4">{item.q}</span>
+                  <span className="text-[#B5651D] font-mono text-lg group-open:rotate-45 transition-transform">
+                    +
+                  </span>
+                </summary>
+                <p className="text-[#636E72] leading-relaxed mt-3">{item.a}</p>
+              </details>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {/* Closing CTA */}
       <section className="px-6 md:px-12 py-24 md:py-32 border-b border-[#1A1A2E]/10">
         <div className="max-w-2xl mx-auto text-center">
           <p className="text-xs font-mono tracking-[0.2em] uppercase text-[#B5651D] mb-6">
@@ -208,13 +318,19 @@ export default function Home() {
           >
             Account aanmaken →
           </Link>
+          <p className="mt-8 text-sm text-[#636E72]">
+            Ben je fysiotherapeut? We maken een versie specifiek voor jou —{" "}
+            <Link href="/zorg" className="text-[#B5651D] underline underline-offset-4">
+              bekijk /zorg
+            </Link>
+          </p>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="px-6 md:px-12 py-10 text-xs font-mono text-[#636E72] flex flex-wrap justify-between gap-4">
         <span>© 2026 KlaarBoek</span>
-        <span>Gemaakt voor nederlandse zzp · met irritant veel aandacht voor detail</span>
+        <span>Gemaakt voor Nederlandse zzp · met irritant veel aandacht voor detail</span>
       </footer>
     </div>
   );
@@ -232,51 +348,48 @@ function Receipt() {
       >
         <div className="text-center mb-4">
           <div className="font-bold tracking-[0.2em] text-sm">KLAARBOEK</div>
-          <div className="text-[10px] text-[#636E72]">
-            factuur · 2026-001
-          </div>
+          <div className="text-[10px] text-[#636E72]">kwartaalrapport · Q1 2026</div>
         </div>
         <div className="border-t border-dashed border-[#1A1A2E]/30 my-3" />
         <div className="grid grid-cols-[1fr_auto] gap-y-1">
-          <span className="text-[#636E72]">klant</span>
-          <span className="text-right">Bakkerij van Dam</span>
-          <span className="text-[#636E72]">kvk</span>
-          <span className="text-right">12345678</span>
-          <span className="text-[#636E72]">datum</span>
-          <span className="text-right">10 apr 2026</span>
+          <span className="text-[#636E72]">inkomsten</span>
+          <span className="text-right">€ 14.000,00</span>
+          <span className="text-[#636E72]">uitgaven</span>
+          <span className="text-right">€ 650,49</span>
+          <span className="text-[#636E72]">winst</span>
+          <span className="text-right">€ 13.349,51</span>
         </div>
         <div className="border-t border-dashed border-[#1A1A2E]/30 my-3" />
         <div className="grid grid-cols-[1fr_auto] gap-y-1">
-          <span>Website redesign</span>
-          <span className="text-right">€ 1.983,47</span>
-          <span className="text-[#636E72] pl-4">BTW 21%</span>
-          <span className="text-right text-[#636E72]">€ 416,53</span>
+          <span>BTW ontvangen</span>
+          <span className="text-right">€ 2.430,57</span>
+          <span>BTW betaald</span>
+          <span className="text-right">€ 112,96</span>
         </div>
         <div className="border-t border-[#1A1A2E] my-3" />
         <div className="grid grid-cols-[1fr_auto]">
-          <span className="font-bold">totaal</span>
-          <span className="text-right font-bold text-sm">€ 2.400,00</span>
+          <span className="font-bold">af te dragen</span>
+          <span className="text-right font-bold text-sm">€ 2.317,61</span>
         </div>
         <div className="mt-5 pt-3 border-t border-dashed border-[#1A1A2E]/30">
           <div className="flex items-center justify-between text-[10px]">
-            <span className="text-[#636E72]">status</span>
-            <span className="text-[#0D9668] font-bold">✓ BETAALD · via ING</span>
+            <span className="text-[#636E72]">deadline</span>
+            <span className="font-bold">30 apr 2026</span>
           </div>
           <div className="flex items-center justify-between text-[10px] mt-1">
-            <span className="text-[#636E72]">categorie</span>
-            <span>Omzet · 21%</span>
+            <span className="text-[#636E72]">gebaseerd op</span>
+            <span>27 transacties</span>
           </div>
         </div>
         <div className="text-center mt-5 text-[10px] text-[#636E72]">
-          bedankt voor je vertrouwen.
+          nu nog zelf invullen op belastingdienst.nl.
         </div>
       </div>
 
-      {/* Subtle stamp */}
       <div className="absolute -right-2 -top-2 md:-right-6 md:-top-6 border-2 border-[#B5651D] text-[#B5651D] px-3 py-2 rotate-[8deg] font-mono text-[10px] tracking-widest uppercase bg-[#F5F3EF]">
-        Nederlands
+        5 min
         <br />
-        ontworpen
+        werk
       </div>
     </div>
   );
