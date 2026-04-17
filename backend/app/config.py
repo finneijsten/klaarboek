@@ -40,6 +40,8 @@ if _is_prod():
         missing.append("SECRET_KEY")
     if len(settings.secret_key) < 32 and settings.secret_key != INSECURE_SECRET_SENTINEL:
         missing.append("SECRET_KEY (must be ≥32 chars)")
+    if not settings.cors_origins or settings.cors_origins == "http://localhost:3000":
+        missing.append("CORS_ORIGINS (must not be localhost in production)")
     if missing:
         sys.stderr.write(
             "FATAL: missing/insecure required environment variables in production: "
